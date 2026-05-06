@@ -12,6 +12,13 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 
 ## Tables
 
+### Gender
+| Field | Type | Description |
+|------|------|------------|
+|id    | INT  |  Primary Key |
+|name  | VARCHAR (50) | e.g. Homme / Femme |
+
+
 ### User
 | Field | Type | Description |
 |------|------|------------|
@@ -19,7 +26,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |name  | VARCHAR (50) |
 |email | VARCHAR (255) | unique|
 |password | VARCHAR (255)|
-|gender | CHAR (1) | M / F |
+|gender_id | INT | |
 |is_gold| TINYINT(1) | 0 (False) / 1 (True)|
 
 ### Wallet
@@ -69,6 +76,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |name| VARCHAR(128) | prise de poids, perte de poids, atteindre son IMC ideal |
+|description | TEXT ||
 
 ### UserGoal
 | Field | Type | Description |
@@ -92,9 +100,9 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |name | VARCHAR(50) | e.g Diet A|
-|description | TEXTE ||
+|description | TEXT ||
 
-### Diet Duration Pricing
+### DietDurationPricing
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
@@ -120,7 +128,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |name | VARCHAR (50) | |
-|description | TEXTE ||
+|description | TEXT ||
 
 ### TemplateDiet
 | Field | Type | Description |
@@ -140,8 +148,11 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |id | INT | PRIMARY KEY |
 |user_id | INT | FK |
 |template_id | INT | FK |
+|generated_at | DATETIME | date de génération |
 |start_date | DATE | |
 |end_date | DATE | |
+|status | VARCHAR(20) | active, rejected, completed |
+|trigger_measurement_id | INT | FK (BodyMeasurement_id) |
 
 ### UserDietPurchase
 | Field | Type | Description |
@@ -153,3 +164,30 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |price_paid| DECIMAL (19, 4)| prix après remise |
 |discount_applied| DECIMAL (19, 4)| remise |
 
+
+## Relation
+- Un `User` dispose d'un `Wallet`.
+- Un `Wallet` appartient à un `User`.
+- Un `User` peut avoir de nombreuses `Transaction` (via `Wallet`).
+- Un `User` peut avoir de nombreuses `BodyMeasurement`.
+- Un `User` peut avoir de nombreux `Goal` via `UserGoal`.
+- Un `User` peut avoir de nombreuses `Recommendation`.
+- Un `User` peut effectuer de `UserDietPurchase`.
+
+- Un `Wallet` contient plusieurs `Transaction`.
+- Une `Transaction` appartient à un `Wallet`.
+- Une `Transaction` a un `TransactionType`.
+
+- Un `User` peut avoir plusieurs `Goal`.
+- Un `Goal` peut être attribué à plusieurs `User` via `UserGoal`.
+- `UserGoal` relie un `User` à un `Goal`.
+
+- Un `PlanTemplate` est associé à un `Goal`.
+- Un `Goal` peut avoir plusieurs `PlanTemplate`.
+
+- Un `Diet` peut avoir plusieurs `DietDurationPricing`.
+- Un `Diet` appartient à plusieurs `FoodCategory` via `DietComposition`.
+- Un `FoodCategory` peut appartenir à plusieurs `Diet` via `DietComposition`.
+
+# Note
+ finir d'établir la relation entre les differentes tables
