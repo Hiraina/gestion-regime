@@ -61,6 +61,8 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |code_value| VARCHAR(50) | e.g "A25SX71D" |
 |amount| DECIMAL(19,4) | somme obtenue en rentrant le code|
 |is_used| TINYINT(1) | 0 / 1 |
+|used_by_user_id| INT | FK |
+|date_of_use| DATETIME ||
 
 ### BodyMeasurement
 | Field | Type | Description |
@@ -165,7 +167,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |discount_applied| DECIMAL (19, 4)| remise |
 
 
-## Relation
+## Relations
 - Un `User` dispose d'un `Wallet`.
 - Un `Wallet` appartient à un `User`.
 - Un `User` peut avoir de nombreuses `Transaction` (via `Wallet`).
@@ -189,5 +191,40 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `Diet` appartient à plusieurs `FoodCategory` via `DietComposition`.
 - Un `FoodCategory` peut appartenir à plusieurs `Diet` via `DietComposition`.
 
-# Note
- finir d'établir la relation entre les differentes tables
+- Un `PlanTemplate` peut avoir plusieurs `Activity` via `TemplateActivity`.
+- Un `Activity` peut appartenir à plusieurs `PlanTemplate`.
+
+- Un `PlanTemplate` peut contenir plusieurs `Diet` via `TemplateDiet`.
+- Un `Diet` peut appartenir à plusieurs `PlanTemplate`.
+
+- Un `User` peut avoir plusieurs `Recommendation`.
+- Un `Recommendation` est générée à partir d'un seul `PlanTemplate`.
+- Un `Recommendation` appartient à un `User`.
+
+- Un `User` peut acheter plusieurs `Diet`.
+- Un `Diet` peut être acheter par plusieurs `User`.
+- `UserDietPurchase` relie `User` et `Diet` avec les détails de l'achats.
+
+- Un `Code` peut être utiliser par un `User`. (A confirmer)
+
+## Regle à suivre
+
+- L'email d'un `User` doit être unique.
+- Un `User` ne peut posséder qu'un seul `Wallet`.
+- Le genre d'un `User` doit référencer une entrée valide dans `Gender`.
+
+- Le solde d'un `Wallet` ne peut pas être négatif.
+- Le montant d'une `Transaction` doit être supérieur à 0.
+- Un `Code` ne peut être utilisé qu'une seule fois. (A Confirmer)
+
+- La taille et le poids doivent être supérieurs à 0.
+- Les `BodyMeasurement` sont utilisées pour calculer l'IMC utilisateur.
+
+- Chaque objectif doit référencer un `Goal` valide.
+
+- Une `Recommendation` doit être générée à partir d'une `BodyMeasurement` valide.
+- La date de fin d'une `Recommendation` doit être postérieure à la date de début.
+
+- Le pourcentage total des `FoodCategory` d'un `Diet` doit être égal à 1.0000.
+- La durée d'une offre de `DietDurationPricing` doit être supérieure à 0.
+- Le prix d'un `DietDurationPricing` doit être positif.
