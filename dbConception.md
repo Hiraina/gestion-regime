@@ -19,7 +19,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |name  | VARCHAR (50) | e.g. Homme / Femme |
 
 
-### User
+### Users
 | Field | Type | Description |
 |------|------|------------|
 |id    | INT  |  Primary Key |
@@ -33,18 +33,18 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 | Field | Type | Description |
 |-------|------|-------------|
 |id     |  INT | Primary Key |
-|user_id|  INT | Foreign Key |
+|users_id|  INT | Foreign Key |
 |balance| DECIMAL (19, 4) |  |
 
 
-### TransactionType
+### TransactionTypes
 | Field | Type | Description |
 |-------|------|-------------|
 |id     |  INT | Primary Key |
 |name|  VARCHAR(50) | (credit, debit, ...) |
 
 
-### Transaction
+### Transactions
 | Field | Type | Description |
 |-------|------|-------------|
 |id     | INT  | PRIMARY KEY |
@@ -54,21 +54,20 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |created_at| DATETIME ||
 
 
-### Code
+### Codes
 | Field | Type | Description |
 |-------|------|-------------|
 |id     | INT  | PRIMARY KEY |
 |code_value| VARCHAR(50) | e.g "A25SX71D" |
 |amount| DECIMAL(19,4) | somme obtenue en rentrant le code|
-|is_used| TINYINT(1) | 0 / 1 |
-|used_by_user_id| INT | FK |
+|used_by_users_id| INT | FK |
 |date_of_use| DATETIME ||
 
 ### BodyMeasurement
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|user_id | INT | FOREIGN KEY |
+|users_id | INT | FOREIGN KEY |
 |height | DECIMAL (5, 2) | utiliser pour le calcul IMC |
 |weight | DECIMAL (6, 2) | utiliser pour le calcul IMC |
 |created_at| DATE | utiliser pour suivre les progès |
@@ -80,11 +79,11 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |name| VARCHAR(128) | prise de poids, perte de poids, atteindre son IMC ideal |
 |description | TEXT ||
 
-### UserGoal
+### UsersGoal
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|user_id | INT |  FOREIGN KEY |
+|users_id | INT |  FOREIGN KEY |
 |goal_id | INT | FOREIGN KEY |
 |start_date| DATE | |
 
@@ -148,7 +147,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|user_id | INT | FK |
+|users_id | INT | FK |
 |template_id | INT | FK |
 |generated_at | DATETIME | date de génération |
 |start_date | DATE | |
@@ -156,11 +155,11 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |status | VARCHAR(20) | active, rejected, completed |
 |trigger_measurement_id | INT | FK (BodyMeasurement_id) |
 
-### UserDietPurchase
+### UsersDietPurchase
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|user_id| INT | FK |
+|users_id| INT | FK |
 |diet_id| INT | FK |
 |duration_days| INT ||
 |price_paid| DECIMAL (19, 4)| prix après remise |
@@ -168,21 +167,21 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 
 
 ## Relations
-- Un `User` dispose d'un `Wallet`.
-- Un `Wallet` appartient à un `User`.
-- Un `User` peut avoir de nombreuses `Transaction` (via `Wallet`).
-- Un `User` peut avoir de nombreuses `BodyMeasurement`.
-- Un `User` peut avoir de nombreux `Goal` via `UserGoal`.
-- Un `User` peut avoir de nombreuses `Recommendation`.
-- Un `User` peut effectuer de `UserDietPurchase`.
+- Un `Users` dispose d'un `Wallet`.
+- Un `Wallet` appartient à un `Users`.
+- Un `Users` peut avoir de nombreuses `Transaction` (via `Wallet`).
+- Un `Users` peut avoir de nombreuses `BodyMeasurement`.
+- Un `Users` peut avoir de nombreux `Goal` via `UsersGoal`.
+- Un `Users` peut avoir de nombreuses `Recommendation`.
+- Un `Users` peut effectuer de `UsersDietPurchase`.
 
 - Un `Wallet` contient plusieurs `Transaction`.
 - Une `Transaction` appartient à un `Wallet`.
 - Une `Transaction` a un `TransactionType`.
 
-- Un `User` peut avoir plusieurs `Goal`.
-- Un `Goal` peut être attribué à plusieurs `User` via `UserGoal`.
-- `UserGoal` relie un `User` à un `Goal`.
+- Un `Users` peut avoir plusieurs `Goal`.
+- Un `Goal` peut être attribué à plusieurs `Users` via `UsersGoal`.
+- `UsersGoal` relie un `Users` à un `Goal`.
 
 - Un `PlanTemplate` est associé à un `Goal`.
 - Un `Goal` peut avoir plusieurs `PlanTemplate`.
@@ -197,25 +196,25 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `PlanTemplate` peut contenir plusieurs `Diet` via `TemplateDiet`.
 - Un `Diet` peut appartenir à plusieurs `PlanTemplate`.
 
-- Un `User` peut avoir plusieurs `Recommendation`.
+- Un `Users` peut avoir plusieurs `Recommendation`.
 - Un `Recommendation` est générée à partir d'un seul `PlanTemplate`.
-- Un `Recommendation` appartient à un `User`.
+- Un `Recommendation` appartient à un `Users`.
 
-- Un `User` peut acheter plusieurs `Diet`.
-- Un `Diet` peut être acheter par plusieurs `User`.
-- `UserDietPurchase` relie `User` et `Diet` avec les détails de l'achats.
+- Un `Users` peut acheter plusieurs `Diet`.
+- Un `Diet` peut être acheter par plusieurs `Users`.
+- `UsersDietPurchase` relie `Users` et `Diet` avec les détails de l'achats.
 
-- Un `Code` peut être utiliser par un `User`. (A confirmer)
+- Un `Code` peut être utiliser par un `Users`.
 
 ## Règles à suivre
 
-- L'email d'un `User` doit être unique.
-- Un `User` ne peut posséder qu'un seul `Wallet`.
-- Le genre d'un `User` doit référencer une entrée valide dans `Gender`.
+- L'email d'un `Users` doit être unique.
+- Un `Users` ne peut posséder qu'un seul `Wallet`.
+- Le genre d'un `Users` doit référencer une entrée valide dans `Gender`.
 
 - Le solde d'un `Wallet` ne peut pas être négatif.
 - Le montant d'une `Transaction` doit être supérieur à 0.
-- Un `Code` ne peut être utilisé qu'une seule fois. (A Confirmer)
+- Un `Code` ne peut être utilisé qu'une seule fois.
 
 - La taille et le poids doivent être supérieurs à 0.
 - Les `BodyMeasurement` sont utilisées pour calculer l'IMC utilisateur.
@@ -234,10 +233,10 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 ### Données utilisateur
 
 Les données suivantes sont fournies ou modifiées directement par les utilisateurs :
-- `User`
+- `Users`
 - `BodyMeasurement`
-- `UserGoal`
-- `UserDietPurchase`
+- `UsersGoal`
+- `UsersDietPurchase`
 
 ### Données administrateur / configuration
 
