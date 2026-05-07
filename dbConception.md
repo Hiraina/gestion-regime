@@ -207,7 +207,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 
 - Un `Code` peut être utiliser par un `User`. (A confirmer)
 
-## Regle à suivre
+## Règles à suivre
 
 - L'email d'un `User` doit être unique.
 - Un `User` ne peut posséder qu'un seul `Wallet`.
@@ -228,3 +228,37 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Le pourcentage total des `FoodCategory` d'un `Diet` doit être égal à 1.0000.
 - La durée d'une offre de `DietDurationPricing` doit être supérieure à 0.
 - Le prix d'un `DietDurationPricing` doit être positif.
+
+## Origine des données
+
+### Données utilisateur
+
+Les données suivantes sont fournies ou modifiées directement par les utilisateurs :
+- `User`
+- `BodyMeasurement`
+- `UserGoal`
+- `UserDietPurchase`
+
+### Données administrateur / configuration
+
+Les données suivantes sont gérées par les administrateurs afin de configurer le système :
+- `Gender`
+- `TransactionType`
+- `Goal`
+- `FoodCategory`
+- `Diet`
+- `DietComposition`
+- `DietDurationPricing`
+- `Activity`
+- `PlanTemplate`
+- `TemplateDiet`
+- `TemplateActivity`
+- `Code`
+
+### Données générées automatiquement
+
+Certaines données sont générées ou mises à jour automatiquement par le système :
+- `Recommendation`
+- `Transaction`
+- le solde et la création du `Wallet`
+- le statut des `Recommendation`
