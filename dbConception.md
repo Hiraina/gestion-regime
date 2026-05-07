@@ -26,7 +26,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |name  | VARCHAR (50) |
 |email | VARCHAR (255) | unique|
 |password | VARCHAR (255)|
-|gender_id | INT | |
+|gender_id | INT | Foreign Key|
 |is_gold| TINYINT(1) | 0 (False) / 1 (True)|
 
 ### Wallet
