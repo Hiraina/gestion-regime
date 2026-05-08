@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Models\UserModel;
+use App\Models\UsersModel;
 
 class AuthController extends BaseController
 {
@@ -14,13 +14,13 @@ class AuthController extends BaseController
     public function attemptLogin()
     {
         $session = session();
-        $userModel = new UserModel();
+        $usersModel = new UsersModel();
 
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
 
         // 🔎 find user
-        $user = $userModel->getByEmail($email);
+        $user = $usersModel->getByEmail($email);
 
         // ❌ user not found
         if (!$user) {

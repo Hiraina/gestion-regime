@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Models\UserModel;
+use App\Models\UsersModel;
 use App\Models\BodyMeasurementsModel;
 use App\Models\WalletsModel;
 
@@ -42,12 +42,12 @@ public function step1()
     {
         $userData = session()->get('register_user');
 
-        $userModel = new UserModel();
+        $usersModel = new UsersModel();
         $bodyModel = new BodyMeasurementsModel();
         $walletsModel = new WalletsModel();
 
         // 1. Insert user
-        $userId = $userModel->insert($userData);
+        $userId = $usersModel->insert($userData);
 
         // 2. Insert body measurement
         $bodyModel->insert([
