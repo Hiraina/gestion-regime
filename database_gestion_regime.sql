@@ -1,4 +1,4 @@
-DROP DATABASE IF EXIST gestion_regime;
+DROP DATABASE IF EXISTS gestion_regime;
 
 CREATE DATABASE gestion_regime;
 USE gestion_regime;
@@ -143,7 +143,7 @@ CREATE OR REPLACE TABLE recommendations(
     end_date DATE,
     status VARCHAR(20),
     trigger_measurement_id INT,
-    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (template_id) REFERENCES plan_templates(id),
     FOREIGN KEY (trigger_measurement_id) REFERENCES body_measurements(id)
 );
