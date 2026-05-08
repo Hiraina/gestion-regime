@@ -9,7 +9,14 @@ class BodyMeasurementsModel extends Model{
 
     protected $table = "body_measurements";
 
+    protected $primaryKey = 'id';
 
+    protected $allowedFields = [
+        'user_id',
+        'height',
+        'weight',
+        'created_at'
+    ];
     public function getMockData($userId){
 
         $data = [

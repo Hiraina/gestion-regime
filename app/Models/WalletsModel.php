@@ -4,9 +4,9 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class WalletModel extends Model
+class WalletsModel extends Model
 {
-    protected $table = 'wallet';
+    protected $table = 'wallets';
     protected $primaryKey = 'id';
 
     protected $allowedFields = [

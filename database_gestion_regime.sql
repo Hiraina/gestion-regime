@@ -69,7 +69,7 @@ CREATE OR REPLACE TABLE goals(
 CREATE OR REPLACE TABLE user_goals(
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
-    goal_id,
+    goal_id INT,
     start_date DATE,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (goal_id) REFERENCES goals(id)
@@ -143,7 +143,7 @@ CREATE OR REPLACE TABLE recommendations(
     end_date DATE,
     status VARCHAR(20),
     trigger_measurement_id INT,
-    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (template_id) REFERENCES plan_templates(id),
     FOREIGN KEY (trigger_measurement_id) REFERENCES body_measurements(id)
 );

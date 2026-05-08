@@ -3,16 +3,19 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
-use App\Models\BodyMeasurementModel;
-use App\Models\WalletModel;
+use App\Models\BodyMeasurementsModel;
+use App\Models\WalletsModel;
 
 class RegisterController extends BaseController
 {
-    public function step1()
-    {
-        return view('register/step1');
-    }
+public function step1()
+{
+    $genderModel = new \App\Models\GenderModel();
 
+    $data['genders'] = $genderModel->findAll();
+
+    return view('register/step1', $data);
+}
     public function postStep1()
     {
         session()->set('register_user', [
@@ -40,8 +43,8 @@ class RegisterController extends BaseController
         $userData = session()->get('register_user');
 
         $userModel = new UserModel();
-        $bodyModel = new BodyMeasurementModel();
-        $walletModel = new WalletModel();
+        $bodyModel = new BodyMeasurementsModel();
+        $walletsModel = new WalletsModel();
 
         // 1. Insert user
         $userId = $userModel->insert($userData);
@@ -55,7 +58,7 @@ class RegisterController extends BaseController
         ]);
 
         // 3. Create wallet
-        $walletModel->insert([
+        $walletsModel->insert([
             'user_id' => $userId,
             'balance' => 0
         ]);
