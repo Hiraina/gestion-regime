@@ -3,7 +3,7 @@ DROP DATABASE IF EXIST gestion_regime;
 CREATE DATABASE gestion_regime;
 USE gestion_regime;
 
-CREATE OR REPLACE TABLE genders(
+CREATE OR REPLACE TABLE gender(
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50)
 );
@@ -13,9 +13,10 @@ CREATE OR REPLACE TABLE users(
     name VARCHAR(50),
     email VARCHAR(255) UNIQUE,
     password VARCHAR(255),
+    birth_date DATE,
     gender_id INT,
     is_gold TINYINT(1),
-    FOREIGN KEY (gender_id) REFERENCES genders(id)
+    FOREIGN KEY (gender_id) REFERENCES gender(id)
 );
 
 CREATE OR REPLACE TABLE wallets(

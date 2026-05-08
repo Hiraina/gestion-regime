@@ -12,7 +12,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 
 ## Tables
 
-### Genders
+### Gender
 | Field | Type | Description |
 |------|------|------------|
 |id    | INT  |  Primary Key |
@@ -26,6 +26,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |name  | VARCHAR (50) |
 |email | VARCHAR (255) | unique|
 |password | VARCHAR (255)|
+|birth_date| DATE ||
 |gender_id | INT | Foreign Key|
 |is_gold| TINYINT(1) | 0 (False) / 1 (True)|
 
@@ -33,7 +34,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 | Field | Type | Description |
 |-------|------|-------------|
 |id     |  INT | Primary Key |
-|users_id|  INT | Foreign Key |
+|user_id|  INT | Foreign Key |
 |balance| DECIMAL (19, 4) |  |
 
 
@@ -67,9 +68,9 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|users_id | INT | FOREIGN KEY |
-|height | DECIMAL (5, 2) | utiliser pour le calcul IMC |
-|weight | DECIMAL (6, 2) | utiliser pour le calcul IMC |
+|user_id | INT | FOREIGN KEY |
+|height | DECIMAL (5, 2) | en cm, utiliser pour le calcul IMC et BMR|
+|weight | DECIMAL (6, 2) | en kg, utiliser pour le calcul IMC et BMR|
 |created_at| DATE | utiliser pour suivre les progès |
 
 ### Goals
@@ -83,7 +84,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|users_id | INT |  FOREIGN KEY |
+|user_id | INT |  FOREIGN KEY |
 |goal_id | INT | FOREIGN KEY |
 |start_date| DATE | |
 
@@ -147,7 +148,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|users_id | INT | FK |
+|user_id | INT | FK |
 |template_id | INT | FK |
 |generated_at | DATETIME | date de génération |
 |start_date | DATE | |
@@ -159,7 +160,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|users_id| INT | FK |
+|user_id| INT | FK |
 |diet_id| INT | FK |
 |duration_days| INT ||
 |price_paid| DECIMAL (19, 4)| prix après remise |
@@ -210,7 +211,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 
 - L'email d'un `Users` doit être unique.
 - Un `Users` ne peut posséder qu'un seul `Wallets`.
-- Le genre d'un `Users` doit référencer une entrée valide dans `Genders`.
+- Le genre d'un `Users` doit référencer une entrée valide dans `Gender`.
 
 - Le solde d'un `Wallets` ne peut pas être négatif.
 - Le montant d'une `Transactions` doit être supérieur à 0.
@@ -241,7 +242,7 @@ Les données suivantes sont fournies ou modifiées directement par les utilisate
 ### Données administrateur / configuration
 
 Les données suivantes sont gérées par les administrateurs afin de configurer le système :
-- `Genders`
+- `Gender`
 - `Transaction_types`
 - `Goals`
 - `Food_categories`
