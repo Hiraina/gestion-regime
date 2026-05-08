@@ -1,4 +1,4 @@
-DROP DATABASE IF EXIST gestion_regime;
+DROP DATABASE IF EXISTS gestion_regime;
 
 CREATE DATABASE gestion_regime;
 USE gestion_regime;
