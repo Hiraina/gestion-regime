@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Controllers;
-
+use App\Controllers\Front\HealthController;
+use App\Services\HealthService;
 class Dashboard extends BaseController
 {
     public function index()
@@ -9,7 +10,13 @@ class Dashboard extends BaseController
         if (!session()->get('is_logged_in')) {
             return redirect()->to('/login');
         }
+        $userId = session()->get('user_id');
 
-        return view('dashboard');
+        $healthController = new HealthController();
+
+        $data = $healthController->getMetricsByUserId($userId);
+
+        return view('dashboard', $data);
+        
     }
 }
