@@ -69,7 +69,7 @@ CREATE OR REPLACE TABLE goals(
 CREATE OR REPLACE TABLE user_goals(
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
-    goal_id,
+    goal_id INT,
     start_date DATE,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (goal_id) REFERENCES goals(id)
