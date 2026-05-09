@@ -9,12 +9,10 @@ class WalletsModel extends Model
     protected $table = 'wallets';
     protected $primaryKey = 'id';
 
-    /*
     protected $allowedFields = [
         'user_id',
         'balance'
     ];
-    */
 
     public function getWalletById($id){
         return $this->where('id', $id)

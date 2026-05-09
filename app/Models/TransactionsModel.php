@@ -8,6 +8,13 @@ class TransactionsModel extends Model
 {
     protected $table = 'transactions';
 
+    protected $allowedFields = [
+        'wallet_id',
+        'amount',
+        'transaction_type_id',
+        'created_at'
+    ];
+
     public function getTransactionById($id){
         return $this->where('id', $id)
                     ->first();

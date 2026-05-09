@@ -1,7 +1,7 @@
-INSERT INTO gender('name') VALUES
+INSERT INTO gender(name) VALUES
 ('Homme'),
-('Femme')
+('Femme');
 
-INSERT INTO transaction_types('name') VALUES
+INSERT INTO transaction_types(name) VALUES
 ('credit'),
-('debit')
+('debit');

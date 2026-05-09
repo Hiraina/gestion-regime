@@ -53,7 +53,11 @@ class WalletController extends BaseController
     public function getBalance(){
         $userId = $this->authService->getUserIdOrFail();
         
-        $this->walletService->getBalance($userId);
+        $balance = $this->walletService->getBalance($userId);
+
+        return $this->response->setJSON([
+            'balance' => $balance
+        ]);
     }
 
     public function getTransactions(){
@@ -63,6 +67,9 @@ class WalletController extends BaseController
             throw new \Exception("User session not initialized");
         }
 
-        $this->walletService->getTransactions($userId);
+        $transactions = $this->walletService->getTransactions($userId);
+        return $this->response->setJSON([
+            'transactions' => $transactions
+        ]);
     }
 }

@@ -11,6 +11,7 @@ class WalletService{
     private $walletModel;
     private $transactionModel;
     private $transactionTypeModel;
+    
 
     public function __construct(){
         $this->walletModel = new WalletsModel();
@@ -29,7 +30,6 @@ class WalletService{
         try {
             $wallet = $this->walletModel
                         ->where('user_id', $userId)
-                        ->forUpdate()
                         ->first();
 
             if(!$wallet){
@@ -51,7 +51,7 @@ class WalletService{
                 'wallet_id' => $wallet['id'],
                 'amount' => $amount,
                 'transaction_type_id' => $typeId,
-                'created_at' => date_create()
+                'created_at' => date('Y-m-d H:i:s')
             ]);
 
             if(!$transaction){
@@ -73,7 +73,6 @@ class WalletService{
         try {
             $wallet = $this->walletModel
                 ->where('user_id', $userId)
-                ->forUpdate()
                 ->first();
 
             if (!$wallet) {
@@ -99,7 +98,8 @@ class WalletService{
             $transaction = $this->transactionModel->insert([
                 'wallet_id' => $wallet['id'],
                 'amount' => $amount,
-                'transaction_type_id' => $typeId
+                'transaction_type_id' => $typeId,
+                'created_at' => date('Y-m-d H:i:s')
             ]);
 
             if (!$transaction) {
