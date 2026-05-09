@@ -57,27 +57,17 @@ class BodyMeasurementsModel extends Model{
     }
 
     public function getLatestByUserId($userId){
-        
-        return $this->getMockData($userId);
-
-        /* a decommenter quand la bdd est utilisable
         return $this -> where('user_id', $userId)
                      -> orderBy('created_at', 'DESC')
                      -> first();
-        */
-        
     }
 
     // return the bodyMeasurement closest to the date
     public function getClosestToDateByUserId($userId, $date){        
 
-        return $this->getMockData($userId);
-
-        /* a decommenter quand la bdd est utilisable
         return $this->where('user_id', $userId)
                     ->orderBy("ABS(DATEDIFF(created_at, '$date'))", 'ASC')
                     ->first();
-        */
     }
 
 

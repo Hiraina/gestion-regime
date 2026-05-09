@@ -59,17 +59,14 @@ class UsersModel extends Model {
         return $data[$userId];
     }
 
-    public function getUserById($userId){
-
-        return $this->getMockData($userId);
-
-        /* a decommenter quand la bdd est utilisable
+    public function getUserById($userId){    
         return $this -> select('users.*, gender.name as gender') 
                      -> join('gender', 'gender.id = users.gender_id')
                     -> where('users.id' , $userId)
                     -> first();
-        */
+        
     }
+    
     //  récupérer user par email
     public function getByEmail($email)
     {
