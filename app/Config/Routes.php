@@ -7,6 +7,8 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
+$routes->get('/test','TestController::index');
+
 $routes->group('health', function($routes){
     $routes->get('metrics','Front\HealthController::getMetrics');
 });
@@ -15,6 +17,7 @@ $routes->group('wallet', function($routes){
     $routes->post('credit', 'Front\WalletController::creditWallet');
     $routes->post('debit', 'Front\WalletController::debitWallet');
     $routes->get('balance', 'Front\WalletController::getBalance');
+    $routes->get('transactions', 'Front\WalletController::getTransactions');
 });
 
 $routes->get('/register/step1', 'RegisterController::step1');

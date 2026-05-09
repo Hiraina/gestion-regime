@@ -4,7 +4,6 @@ namespace App\Controllers\Front;
 
 use App\Controllers\BaseController;
 use App\Services\WalletService;
-use App\Models\UsersModel;
 
 class WalletController extends BaseController
 {
@@ -16,7 +15,7 @@ class WalletController extends BaseController
     }
 
     public function creditWallet(){        
-        $userId = session()->get('user_id');
+        $userId = $this->authService->getUserIdOrFail();
 
         $amount = $this->request->getPost('amount');
 
@@ -34,7 +33,7 @@ class WalletController extends BaseController
     }
 
     public function debitWallet(){
-        $userId = session()->get('user_id');
+        $userId = $this->authService->getUserIdOrFail();
 
         $amount = $this->request->getPost('amount');
 
@@ -52,11 +51,18 @@ class WalletController extends BaseController
     }
 
     public function getBalance(){
-        $userId = session()->get('user_id');
+        $userId = $this->authService->getUserIdOrFail();
         
+        $this->walletService->getBalance($userId);
     }
 
     public function getTransactions(){
-        $userId = session()->get('user_id');
+        $userId = $this->authService->getUserIdOrFail();
+
+        if($userId === null){
+            throw new \Exception("User session not initialized");
+        }
+
+        $this->walletService->getTransactions($userId);
     }
 }

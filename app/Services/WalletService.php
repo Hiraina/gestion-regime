@@ -120,7 +120,7 @@ class WalletService{
         return $wallet['balance'];
     }
 
-    public function getTransactions($userId, $perPage){
+    public function getTransactions($userId, $perPage = 10){
         $wallet = $this->getWalletOrFail($userId);
 
         return $this->transactionModel->getTransactionsByWalletId($wallet['id'], $perPage);       
