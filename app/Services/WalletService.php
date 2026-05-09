@@ -113,4 +113,28 @@ class WalletService{
             throw $th;
         }
     }
+
+    public function getBalance($userId){
+        $wallet = $this->getWalletOrFail($userId);
+
+        return $wallet['balance'];
+    }
+
+    public function getTransactions($userId, $perPage){
+        $wallet = $this->getWalletOrFail($userId);
+
+        return $this->transactionModel->getTransactionsByWalletId($wallet['id'], $perPage);       
+    }
+
+    private function getWalletOrFail($userId){
+        $wallet = $this->walletModel
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$wallet) {
+            throw new \Exception("Wallet not found");
+        }
+
+        return $wallet;
+    }
 }

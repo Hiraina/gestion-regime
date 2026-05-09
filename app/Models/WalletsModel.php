@@ -31,4 +31,10 @@ class WalletsModel extends Model
                     ->set('balance', $amount)
                     ->update();
     }
+
+    public function getBalance($userId){
+        return $this->select('balance')
+                    ->where('user_id', $userId)
+                    ->first();
+    }
 }

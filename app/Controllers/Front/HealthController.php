@@ -10,7 +10,7 @@ use App\Models\UsersModel;
 class HealthController extends BaseController
 {
     public function getMetrics(){
-        $userId = 0; // fixed for testing
+        $userId = session()->get('user_id');
 
         $bodyMeasurementModel = new BodyMeasurementsModel();
         $measurement = $bodyMeasurementModel -> getLatestByUserId($userId);
