@@ -10,7 +10,8 @@ use App\Models\UsersModel;
 class HealthController extends BaseController
 {
     public function getMetrics(){
-         $userId = 0; // fixed for testing
+        $userId = $this->authService->getUserIdOrFail();
+
         $bodyMeasurementModel = new BodyMeasurementsModel();
         $measurement = $bodyMeasurementModel -> getLatestByUserId($userId);
 

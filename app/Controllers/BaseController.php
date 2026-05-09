@@ -6,6 +6,7 @@ use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use App\Services\AuthService;
 
 /**
  * BaseController provides a convenient place for loading components
@@ -26,6 +27,7 @@ abstract class BaseController extends Controller
      */
 
     // protected $session;
+    protected AuthService $authService;
 
     /**
      * @return void
@@ -35,6 +37,8 @@ abstract class BaseController extends Controller
         // Load here all helpers you want to be available in your controllers that extend BaseController.
         // Caution: Do not put the this below the parent::initController() call below.
         // $this->helpers = ['form', 'url'];
+
+        $this->authService = new AuthService();
 
         // Caution: Do not edit this line.
         parent::initController($request, $response, $logger);
