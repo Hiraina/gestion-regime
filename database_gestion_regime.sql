@@ -162,3 +162,41 @@ CREATE OR REPLACE TABLE user_diet_purchases(
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (diet_id) REFERENCES diets(id)
 );
+
+
+
+
+CREATE OR REPLACE TABLE user_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    age INT NOT NULL,
+
+    activity_level ENUM(
+        'sedentaire',
+        'leger',
+        'modere',
+        'intense'
+    ) NOT NULL,
+
+    objective ENUM(
+        'perte_poids',
+        'maintien',
+        'prise_masse'
+    ) NOT NULL,
+
+    diet_type ENUM(
+        'standard',
+        'vegetarien',
+        'vegan',
+        'keto',
+        'sans_gluten'
+    ) DEFAULT 'standard',
+
+    allergies TEXT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);

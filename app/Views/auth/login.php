@@ -1,29 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Connexion</title>
+
+    <link rel="stylesheet" href="<?= base_url('assets/css/global.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/auth.css') ?>">
 </head>
 <body>
 
-<h2>Connexion</h2>
+<div class="auth-container">
 
-<?php if (session()->getFlashdata('error')) : ?>
-    <p style="color:red;">
-        <?= session()->getFlashdata('error') ?>
-    </p>
-<?php endif; ?>
+    <div class="auth-card">
 
-<form method="post" action="/login">
+        <div class="logo">
+            <h1>NutriGoal</h1>
+            <p>Votre régime adapté à vos objectifs</p>
+        </div>
 
-    <?= csrf_field() ?> <!-- 🔥 obligatoire CI4 -->
+        <div class="auth-title">
+            <h2>Connexion</h2>
+            <span>Accédez à votre espace santé</span>
+        </div>
 
-    <input type="email" name="email" placeholder="Email" required><br><br>
+        <?php if (session()->getFlashdata('error')) : ?>
+            <div class="error-message">
+                <?= session()->getFlashdata('error') ?>
+            </div>
+        <?php endif; ?>
 
-    <input type="password" name="password" placeholder="Mot de passe" required><br><br>
+        <form method="post" action="/login">
 
-    <button type="submit">Se connecter</button>
+            <?= csrf_field() ?>
 
-</form>
+            <div class="form-group">
+                <label>Email</label>
+                <input class="form-control" type="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input class="form-control" type="password" name="password" required>
+            </div>
+
+            <button class="btn" type="submit">
+                Se connecter
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
 
 </body>
 </html>

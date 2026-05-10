@@ -1,0 +1,89 @@
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--secondary);
+    color: white;
+    padding: 30px 20px;
+}
+
+.sidebar h2 {
+    color: #4ade80;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.sidebar a {
+    display: block;
+    color: #cbd5e1;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    background: rgba(255,255,255,0.08);
+    color: white;
+}
+
+.main-content {
+    flex: 1;
+    padding: 40px;
+}
+
+.topbar {
+    margin-bottom: 30px;
+}
+
+.topbar h1 {
+    font-size: 32px;
+    color: var(--secondary);
+}
+
+.topbar p {
+    color: var(--text-light);
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap: 25px;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.05);
+}
+
+.card h3 {
+    color: var(--text-light);
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.card-value {
+    font-size: 40px;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.logout-btn {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 12px 20px;
+    background: #ef4444;
+    color: white;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.logout-btn:hover {
+    background: #dc2626;
+}

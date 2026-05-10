@@ -30,5 +30,15 @@ $routes->get('/login', 'AuthController::login');
 $routes->post('/login', 'AuthController::attemptLogin');
 $routes->get('/logout', 'AuthController::logout');
 
+$routes->get('/profile/complete', 'ProfileController::complete');
+$routes->post('/profile/complete', 'ProfileController::save');
+
+$routes->get('/profile', 'ProfileController::index');
+
+
+
+
+$routes->get('/goals', 'GoalController::index');
+$routes->post('/goals/save', 'GoalController::save');
 
 $routes->get('/dashboard', 'Dashboard::index');
