@@ -133,6 +133,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |diet_id | INT | PRIMARY KEY / FK | 
 |food_item_id| INT| PRIMARY KEY / FK|
 |quantity| DECIMAL (19, 4)| en gramme |
+|percentage| DECIMAL (5, 2)||
 
 ### Activities
 | Field | Type | Description |
