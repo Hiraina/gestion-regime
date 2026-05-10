@@ -47,7 +47,6 @@ CREATE OR REPLACE TABLE codes(
     amount DECIMAL(19, 4),
     used_by_user_id INT,
     date_of_use DATETIME,
-    is_used TINYINT(1),
     FOREIGN KEY (used_by_user_id) REFERENCES users(id)
 );
 
@@ -71,6 +70,8 @@ CREATE OR REPLACE TABLE user_goals(
     user_id INT,
     goal_id INT,
     start_date DATE,
+    min_kg DECIMAL(6,2),
+    max_kg DECIMAL(6,2),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (goal_id) REFERENCES goals(id)
 );
@@ -80,7 +81,7 @@ CREATE OR REPLACE TABLE plan_templates(
     goal_id INT,
     imc_min DECIMAL(5,2),
     imc_max DECIMAL(5,2),
-    duration INT,
+    duration_days INT,
     FOREIGN KEY (goal_id) REFERENCES goals(id)
 );
 
@@ -103,19 +104,28 @@ CREATE OR REPLACE TABLE food_categories(
     name VARCHAR(50)
 );
 
+CREATE OR REPLACE TABLE food_items(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT,
+    name VARCHAR(50),
+    calories_per_100g DECIMAL(19,4),
+    FOREIGN KEY (category_id) REFERENCES food_categories(id)
+);
+
 CREATE OR REPLACE TABLE diet_compositions(
     diet_id INT,
-    category_id INT,
-    percentage DECIMAL(5,4),
+    food_item_id INT,
+    quantity DECIMAL(19,4),
     FOREIGN KEY (diet_id) REFERENCES diets(id),
-    FOREIGN KEY (category_id) REFERENCES food_categories(id),
-    PRIMARY KEY (diet_id, category_id)
+    FOREIGN KEY (food_item_id) REFERENCES food_items(id),
+    PRIMARY KEY (diet_id, food_item_id)
 );
 
 CREATE OR REPLACE TABLE activities(
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50),
-    description TEXT
+    description TEXT,
+    met_value DECIMAL(6,2)
 );
 
 CREATE OR REPLACE TABLE template_diets(
@@ -129,6 +139,8 @@ CREATE OR REPLACE TABLE template_diets(
 CREATE OR REPLACE TABLE template_activities(
     template_id INT,
     activity_id INT,
+    frequency_per_week INT,
+    duration_minutes INT,
     FOREIGN KEY (template_id) REFERENCES plan_templates(id),
     FOREIGN KEY (activity_id) REFERENCES activities(id),
     PRIMARY KEY (template_id, activity_id)    

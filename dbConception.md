@@ -11,7 +11,6 @@ Le système suit la progression des utilisateurs, gère les transactions financi
 Certaines parties du système sont automatisées (recommandations, suivi, etc.), tandis que d’autres dépendent des informations fournies par les utilisateurs (mesures corporelles, objectifs, etc.).
 
 ## Tables
-
 ### Gender
 | Field | Type | Description |
 |------|------|------------|
@@ -21,7 +20,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 
 ### Users
 | Field | Type | Description |
-|------|------|------------|
+|------|------|--------------|
 |id    | INT  |  Primary Key |
 |name  | VARCHAR (50) |
 |email | VARCHAR (255) | unique|
@@ -61,7 +60,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |id     | INT  | PRIMARY KEY |
 |code_value| VARCHAR(50) | e.g "A25SX71D" |
 |amount| DECIMAL(19,4) | somme obtenue en rentrant le Codes|
-|used_by_users_id| INT | FK |
+|used_by_user_id| INT | FK |
 |date_of_use| DATETIME ||
 
 ### Body_measurements
@@ -77,7 +76,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|name| VARCHAR(128) | prise de poids, perte de poids, atteindre son IMC ideal |
+|name| VARCHAR(120) | prise de poids, perte de poids, atteindre son IMC ideal |
 |description | TEXT ||
 
 ### User_goals
@@ -86,6 +85,8 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |id | INT | PRIMARY KEY |
 |user_id | INT |  FOREIGN KEY |
 |goal_id | INT | FOREIGN KEY |
+|min_kg| DECIMAL(6,2)||
+|max_kg| DECIMAL(6,2)||
 |start_date| DATE | |
 
 ### Plan_templates
@@ -95,7 +96,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |goal_id | INT | FOREIGN KEY |
 |imc_min| DECIMAL(5,2) ||
 |imc_max| DECIMAL(5,2) ||
-|duration| INT | Durée en jour |
+|duration_days| INT | Durée en jour |
 
 ### Diets
 | Field | Type | Description |
@@ -118,12 +119,20 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |id | INT | PRIMARY KEY |
 |name| VARCHAR(50) | e.g viande, poisson, volaille |
 
+### Food_items
+| Field | Type | Description |
+|-------|------|-------------|
+|id| INT| PRIMARY KEY|
+|category_id| INT | FK|
+|name| VARCHAR(50)| e.g. cuisse de poulet, saumon|
+|calories_per_100g| DECIMAL(19,4) | en Kcal|
+
 ### Diet_compositions
 | Field | Type | Description |
 |-------|------|-------------|
 |diet_id | INT | PRIMARY KEY / FK | 
-|category_id| INT | PRIMARY KEY / FK|
-|percentage| DECIMAL (5, 4)| de 0.0000 à 1.0000|
+|food_item_id| INT| PRIMARY KEY / FK|
+|quantity| DECIMAL (19, 4)| en gramme |
 
 ### Activities
 | Field | Type | Description |
@@ -131,6 +140,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |id | INT | PRIMARY KEY |
 |name | VARCHAR (50) | |
 |description | TEXT ||
+|met_value| DECIMAL(6,2) | utiliser pour le calcule des calories brulées|
 
 ### Template_diets
 | Field | Type | Description |
@@ -143,6 +153,8 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |-------|------|-------------|
 |template_id | INT | PRIMARY KEY / FK |
 |activity_id | INT | PRIMARY KEY / FK |
+|frequency_per_week| INT | |
+|duration_minutes| INT | |
 
 ### Recommendations
 | Field | Type | Description |
@@ -188,8 +200,10 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `Goals` peut avoir plusieurs `Plan_templates`.
 
 - Un `Diets` peut avoir plusieurs `Diet_duration_pricing`.
-- Un `Diets` appartient à plusieurs `Food_categories` via `Diet_compositions`.
-- Un `Food_categories` peut appartenir à plusieurs `Diets` via `Diet_compositions`.
+- Un `Food_items` appartient a un `Food_categories`.
+- Un `Food_categories` peut avoir plusieurs `Food_items`.
+- Un `Diets` peut contenir plusieurs `Food_items` via `Diet_compositions`.
+- Un `Food_items` peut appartenir a plusieurs `Diets` via `Diet_compositions`.
 
 - Un `Plan_templates` peut avoir plusieurs `Activities` via `Template_activities`.
 - Un `Activities` peut appartenir à plusieurs `Plan_templates`.
@@ -204,8 +218,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `Users` peut acheter plusieurs `Diets`.
 - Un `Diets` peut être acheter par plusieurs `Users`.
 - `User_diet_purchases` relie `Users` et `Diets` avec les détails de l'achats.
-
-- Un `Codes` peut être utiliser par un `Users`.
+- Un `Codes` peut etre utilise par un `Users`.
 
 ## Règles à suivre
 
@@ -246,6 +259,7 @@ Les données suivantes sont gérées par les administrateurs afin de configurer 
 - `Transaction_types`
 - `Goals`
 - `Food_categories`
+- `Food_items`
 - `Diets`
 - `Diet_compositions`
 - `Diet_duration_pricing`
