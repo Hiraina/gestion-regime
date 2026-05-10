@@ -119,7 +119,7 @@ CREATE OR REPLACE TABLE food_distributions(
     FOREIGN KEY (diet_id) REFERENCES diets(id),
     FOREIGN KEY (category_id) REFERENCES food_categories(id),
     PRIMARY KEY(diet_id, category_id)
-)
+);
 
 CREATE OR REPLACE TABLE diet_compositions(
     diet_id INT,
