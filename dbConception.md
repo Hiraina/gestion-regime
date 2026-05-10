@@ -89,15 +89,6 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |max_kg| DECIMAL(6,2)||
 |start_date| DATE | |
 
-### Plan_templates
-| Field | Type | Description |
-|-------|------|-------------|
-|id | INT | PRIMARY KEY |
-|goal_id | INT | FOREIGN KEY |
-|imc_min| DECIMAL(5,2) ||
-|imc_max| DECIMAL(5,2) ||
-|duration_days| INT | Durée en jour |
-
 ### Diets
 | Field | Type | Description |
 |-------|------|-------------|
@@ -149,31 +140,25 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |description | TEXT ||
 |met_value| DECIMAL(6,2) | utiliser pour le calcule des calories brulées|
 
-### Template_diets
-| Field | Type | Description |
-|-------|------|-------------|
-|template_id | INT | PRIMARY KEY / FK |
-|diet_id| INT | PRIMARY KEY / FK |
-
-### Template_activities
-| Field | Type | Description |
-|-------|------|-------------|
-|template_id | INT | PRIMARY KEY / FK |
-|activity_id | INT | PRIMARY KEY / FK |
-|frequency_per_week| INT | |
-|duration_minutes| INT | |
-
 ### Recommendations
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |user_id | INT | FK |
-|template_id | INT | FK |
+|diet_id | INT | FK |
 |generated_at | DATETIME | date de génération |
 |start_date | DATE | |
 |end_date | DATE | |
 |status | VARCHAR(20) | active, rejected, completed |
 |trigger_measurement_id | INT | FK (BodyMeasurement_id) |
+
+### Recommendation_activities
+| Field | Type | Description |
+|-------|------|-------------|
+|recommendation_id | INT | PRIMARY KEY / FK |
+|activity_id | INT | PRIMARY KEY / FK |
+|frequency_per_week| INT | |
+|duration_minutes| INT | |
 
 ### User_diet_purchases
 | Field | Type | Description |
@@ -203,8 +188,6 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `Goals` peut être attribué à plusieurs `Users` via `User_goals`.
 - `User_goals` relie un `Users` à un `Goals`.
 
-- Un `Plan_templates` est associé à un `Goals`.
-- Un `Goals` peut avoir plusieurs `Plan_templates`.
 
 - Un `Diets` peut avoir plusieurs `Diet_duration_pricing`.
 - Un `Food_items` appartient a un `Food_categories`.
@@ -214,15 +197,10 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `Diets` peut contenir plusieurs `Food_items` via `Diet_compositions`.
 - Un `Food_items` peut appartenir a plusieurs `Diets` via `Diet_compositions`.
 
-- Un `Plan_templates` peut avoir plusieurs `Activities` via `Template_activities`.
-- Un `Activities` peut appartenir à plusieurs `Plan_templates`.
-
-- Un `Plan_templates` peut contenir plusieurs `Diets` via `Template_diets`.
-- Un `Diets` peut appartenir à plusieurs `Plan_templates`.
-
-- Un `Users` peut avoir plusieurs `Recommendations`.
-- Un `Recommendations` est générée à partir d'un seul `Plan_templates`.
 - Un `Recommendations` appartient à un `Users`.
+- Un `Recommendations` est générée à partir d'un seul `Diets`.
+- Un `Recommendations` peut inclure plusieurs `Activities` via `Recommendation_activities`.
+- Un `Activities` peut appartenir à plusieurs `Recommendations` via `Recommendation_activities`.
 
 - Un `Users` peut acheter plusieurs `Diets`.
 - Un `Diets` peut être acheter par plusieurs `Users`.
@@ -260,6 +238,7 @@ Les données suivantes sont fournies ou modifiées directement par les utilisate
 - `Body_measurements`
 - `User_goals`
 - `User_diet_purchases`
+- `Food_distributions`
 
 ### Données administrateur / configuration
 
@@ -270,8 +249,6 @@ Les données suivantes sont gérées par les administrateurs afin de configurer 
 - `Food_categories`
 - `Food_items`
 - `Diets`
-- `Diet_compositions`
-- `Food_distributions`
 - `Diet_duration_pricing`
 - `Activities`
 - `Plan_templates`
@@ -284,5 +261,6 @@ Les données suivantes sont gérées par les administrateurs afin de configurer 
 Certaines données sont générées ou mises à jour automatiquement par le système :
 - `Recommendations`
 - `Transactions`
+- `Diet_compositions`
 - le solde et la création du `Wallets`
 - le statut des `Recommendations`
