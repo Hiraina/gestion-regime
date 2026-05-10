@@ -36,7 +36,7 @@ $routes->post('/profile/complete', 'ProfileController::save');
 $routes->get('/profile', 'ProfileController::index');
 
 
-
+$routes->post('codes/redeem', 'CodesController::redeem');
 
 $routes->get('/goals', 'GoalController::index');
 $routes->post('/goals/save', 'GoalController::save');

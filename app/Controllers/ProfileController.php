@@ -34,6 +34,8 @@ public function index()
     $imc = null;
     if ($measurement) {
         $imc = $healthService->calculateIMC($measurement);
+        // Formater l'IMC avec 1 décimale pour l'affichage
+$imc = number_format($imc, 1);
     }
 
     return view('profile/index', [
