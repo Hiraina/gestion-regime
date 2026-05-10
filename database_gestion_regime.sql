@@ -76,15 +76,6 @@ CREATE OR REPLACE TABLE user_goals(
     FOREIGN KEY (goal_id) REFERENCES goals(id)
 );
 
-CREATE OR REPLACE TABLE plan_templates(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    goal_id INT,
-    imc_min DECIMAL(5,2),
-    imc_max DECIMAL(5,2),
-    duration_days INT,
-    FOREIGN KEY (goal_id) REFERENCES goals(id)
-);
-
 CREATE OR REPLACE TABLE diets(
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50),
@@ -137,36 +128,28 @@ CREATE OR REPLACE TABLE activities(
     met_value DECIMAL(6,2)
 );
 
-CREATE OR REPLACE TABLE template_diets(
-    template_id INT,
-    diet_id INT,
-    FOREIGN KEY (template_id) REFERENCES plan_templates(id),
-    FOREIGN KEY (diet_id) REFERENCES diets(id),
-    PRIMARY KEY(template_id, diet_id)
-);
-
-CREATE OR REPLACE TABLE template_activities(
-    template_id INT,
-    activity_id INT,
-    frequency_per_week INT,
-    duration_minutes INT,
-    FOREIGN KEY (template_id) REFERENCES plan_templates(id),
-    FOREIGN KEY (activity_id) REFERENCES activities(id),
-    PRIMARY KEY (template_id, activity_id)    
-);
-
 CREATE OR REPLACE TABLE recommendations(
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
-    template_id INT,
+    diet_id INT,
     generated_at DATETIME,
     start_date DATE,
     end_date DATE,
     status VARCHAR(20),
     trigger_measurement_id INT,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (template_id) REFERENCES plan_templates(id),
+    FOREIGN KEY (diet_id) REFERENCES diets(id),
     FOREIGN KEY (trigger_measurement_id) REFERENCES body_measurements(id)
+);
+
+CREATE OR REPLACE TABLE recommendation_activities(
+    recommendation_id INT,
+    activity_id INT,
+    frequency_per_week INT,
+    duration_minutes INT,
+    FOREIGN KEY (recommendation_id) REFERENCES recommendations(id),
+    FOREIGN KEY (activity_id) REFERENCES activities(id),
+    PRIMARY KEY (recommendation_id, activity_id)
 );
 
 CREATE OR REPLACE TABLE user_diet_purchases(
