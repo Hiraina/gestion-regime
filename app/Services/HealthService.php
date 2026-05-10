@@ -25,7 +25,10 @@ class HealthService {
          * height en cm
          * age en année
          */
-
+    // Retourner null si données manquantes
+    if (empty($measurement['weight']) || empty($measurement['height']) || empty($userInfo['birth_date'])) {
+        return null;
+    }
         $height = $measurements['height'];
         $weight = $measurements['weight'];
 

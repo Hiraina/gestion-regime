@@ -13,126 +13,47 @@
     <div class="register-card">
 
         <div class="step-badge">
-            Profil nutritionnel
+            Profil 
         </div>
 
         <h2>Complétez votre profil</h2>
 
-        <p class="register-subtitle">
-            Ces informations permettront de générer un régime adapté
-        </p>
 
-        <form method="post" action="/profile/complete">
+<form method="post" action="/profile/complete">
+    <?= csrf_field() ?>
 
-            <?= csrf_field() ?>
+    <div class="form-group">
+        <label>Date de naissance</label>
+        <input
+            class="form-control"
+            type="date"
+            name="birth_date"
+            value="<?= esc($user['birth_date'] ?? '') ?>"
+            required>
+    </div>
 
-            <div class="form-group">
-                <label>Âge</label>
-                <input
-                    class="form-control"
-                    type="number"
-                    name="age"
-                    required>
-            </div>
+    <div class="form-group">
+        <label>Numéro de téléphone</label>
+        <input
+            class="form-control"
+            type="text"
+            name="num_telephone"
+            value="<?= esc($profile['num_telephone'] ?? '') ?>"
+            required>
+    </div>
 
-            <div class="form-group">
-                <label>Niveau d'activité</label>
+    <div class="form-group">
+        <label>Adresse</label>
+        <textarea
+            class="form-control"
+            name="adresse"
+            required><?= esc($profile['adresse'] ?? '') ?></textarea>
+    </div>
 
-                <select
-                    class="form-control"
-                    name="activity_level"
-                    required>
-
-                    <option value="sedentaire">
-                        Sédentaire
-                    </option>
-
-                    <option value="leger">
-                        Léger
-                    </option>
-
-                    <option value="modere">
-                        Modéré
-                    </option>
-
-                    <option value="intense">
-                        Intense
-                    </option>
-
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Objectif</label>
-
-                <select
-                    class="form-control"
-                    name="objective"
-                    required>
-
-                    <option value="perte_poids">
-                        Perte de poids
-                    </option>
-
-                    <option value="maintien">
-                        Maintien
-                    </option>
-
-                    <option value="prise_masse">
-                        Prise de masse
-                    </option>
-
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Type de régime préféré</label>
-
-                <select
-                    class="form-control"
-                    name="diet_type">
-
-                    <option value="standard">
-                        Standard
-                    </option>
-
-                    <option value="vegetarien">
-                        Végétarien
-                    </option>
-
-                    <option value="vegan">
-                        Vegan
-                    </option>
-
-                    <option value="keto">
-                        Keto
-                    </option>
-
-                    <option value="sans_gluten">
-                        Sans gluten
-                    </option>
-
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Allergies alimentaires</label>
-
-                <textarea
-                    name="allergies"
-                    placeholder="Ex: arachides, lactose..."></textarea>
-            </div>
-
-            <button
-                class="btn-register"
-                type="submit">
-
-                Enregistrer mon profil
-
-            </button>
-
-        </form>
-
+    <button class="btn-register" type="submit">
+        Enregistrer mon profil
+    </button>
+</form>
     </div>
 
 </div>

@@ -172,29 +172,8 @@ CREATE OR REPLACE TABLE user_profiles (
     user_id INT NOT NULL,
 
     age INT NOT NULL,
-
-    activity_level ENUM(
-        'sedentaire',
-        'leger',
-        'modere',
-        'intense'
-    ) NOT NULL,
-
-    objective ENUM(
-        'perte_poids',
-        'maintien',
-        'prise_masse'
-    ) NOT NULL,
-
-    diet_type ENUM(
-        'standard',
-        'vegetarien',
-        'vegan',
-        'keto',
-        'sans_gluten'
-    ) DEFAULT 'standard',
-
-    allergies TEXT NULL,
+    num_telephone VARCHAR(20) NOT NULL,
+    adresse TEXT NOT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 

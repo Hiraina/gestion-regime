@@ -11,9 +11,7 @@ class UserProfilesModel extends Model
     protected $allowedFields = [
         'user_id',
         'age',
-        'activity_level',
-        'objective',
-        'diet_type',
-        'allergies'
+        'num_telephone',
+        'adresse'
     ];
 }
