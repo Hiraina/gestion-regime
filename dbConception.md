@@ -127,13 +127,19 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |name| VARCHAR(50)| e.g. cuisse de poulet, saumon|
 |calories_per_100g| DECIMAL(19,4) | en Kcal|
 
+### Food_distributions
+| Field | Type | Description |
+|-------|------|-------------|
+|diet_id | INT | PRIMARY KEY / FK |
+|category_id | INT | PRIMARY KEY / FK |
+|percentage | DECIMAL (5, 2) | % of diet from this category |
+
 ### Diet_compositions
 | Field | Type | Description |
 |-------|------|-------------|
 |diet_id | INT | PRIMARY KEY / FK | 
 |food_item_id| INT| PRIMARY KEY / FK|
 |quantity| DECIMAL (19, 4)| en gramme |
-|percentage| DECIMAL (5, 2)||
 
 ### Activities
 | Field | Type | Description |
@@ -203,6 +209,8 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `Diets` peut avoir plusieurs `Diet_duration_pricing`.
 - Un `Food_items` appartient a un `Food_categories`.
 - Un `Food_categories` peut avoir plusieurs `Food_items`.
+- Un `Diets` peut avoir plusieurs `Food_distributions` par catégories.
+- Un `Food_categories` peut avoir plusieurs `Food_distributions`.
 - Un `Diets` peut contenir plusieurs `Food_items` via `Diet_compositions`.
 - Un `Food_items` peut appartenir a plusieurs `Diets` via `Diet_compositions`.
 
@@ -239,7 +247,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Une `Recommendations` doit être générée à partir d'une `Body_measurements` valide.
 - La date de fin d'une `Recommendations` doit être postérieure à la date de début.
 
-- Le pourcentage total des `Food_categories` d'un `Diets` doit être égal à 1.0000.
+- Le pourcentage total des `Food_distributions` pour un `Diets` doit être égal à 100.
 - La durée d'une offre de `Diet_duration_pricing` doit être supérieure à 0.
 - Le prix d'un `Diet_duration_pricing` doit être positif.
 
@@ -263,6 +271,7 @@ Les données suivantes sont gérées par les administrateurs afin de configurer 
 - `Food_items`
 - `Diets`
 - `Diet_compositions`
+- `Food_distributions`
 - `Diet_duration_pricing`
 - `Activities`
 - `Plan_templates`

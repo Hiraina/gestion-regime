@@ -112,11 +112,19 @@ CREATE OR REPLACE TABLE food_items(
     FOREIGN KEY (category_id) REFERENCES food_categories(id)
 );
 
+CREATE OR REPLACE TABLE food_distributions{
+    diet_id INT,
+    category_id INT,
+    percentage DECIMAL(5,2),
+    FOREIGN KEY (diet_id) REFERENCES diets(id),
+    FOREIGN KEY (category_id) REFERENCES food_categories(id),
+    PRIMARY KEY(diet_id, category_id)
+}
+
 CREATE OR REPLACE TABLE diet_compositions(
     diet_id INT,
     food_item_id INT,
     quantity DECIMAL(19,4),
-    percentage DECIMAL(5,2),
     FOREIGN KEY (diet_id) REFERENCES diets(id),
     FOREIGN KEY (food_item_id) REFERENCES food_items(id),
     PRIMARY KEY (diet_id, food_item_id)
