@@ -7,9 +7,6 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
-$routes->get('/test','TestController::index');
-$routes->get('/test/create_recommendation', 'TestController::createRecommendation');
-
 $routes->group('health', function($routes){
     $routes->get('metrics','Front\HealthController::getMetrics');
 });
