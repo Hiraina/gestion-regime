@@ -85,8 +85,7 @@ CREATE OR REPLACE TABLE diets(
 CREATE OR REPLACE TABLE diet_duration_pricing(
     id INT AUTO_INCREMENT PRIMARY KEY,
     diet_id INT,
-    duration_days INT,
-    price DECIMAL(19, 4),
+    price_per_day DECIMAL(19, 4),
     FOREIGN KEY (diet_id) REFERENCES diets(id)
 );
 
@@ -112,15 +111,6 @@ CREATE OR REPLACE TABLE food_distributions(
     PRIMARY KEY(diet_id, category_id)
 );
 
-CREATE OR REPLACE TABLE diet_compositions(
-    diet_id INT,
-    food_item_id INT,
-    quantity DECIMAL(19,4),
-    FOREIGN KEY (diet_id) REFERENCES diets(id),
-    FOREIGN KEY (food_item_id) REFERENCES food_items(id),
-    PRIMARY KEY (diet_id, food_item_id)
-);
-
 CREATE OR REPLACE TABLE activities(
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50),
@@ -140,6 +130,18 @@ CREATE OR REPLACE TABLE recommendations(
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (diet_id) REFERENCES diets(id),
     FOREIGN KEY (trigger_measurement_id) REFERENCES body_measurements(id)
+);
+
+
+CREATE OR REPLACE TABLE diet_compositions(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recommendation_id INT,
+    diet_id INT,
+    food_item_id INT,
+    quantity DECIMAL(19,4),
+    FOREIGN KEY (recommendation_id) REFERENCES recommendations(id),
+    FOREIGN KEY (diet_id) REFERENCES diets(id),
+    FOREIGN KEY (food_item_id) REFERENCES food_items(id)
 );
 
 CREATE OR REPLACE TABLE recommendation_activities(

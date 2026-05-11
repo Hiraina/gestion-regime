@@ -12,7 +12,6 @@ class DietDurationPricingModel extends Model
 
     protected $allowedFields = [
         'diet_id',
-        'duration_days',
-        'price'
+        'price_per_day'
     ];
 }

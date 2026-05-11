@@ -1,6 +1,1 @@
-Refactor: (à confirmer)
-    1.changer la recommandation et utilisé un template au lieu de generer le regime
-
-feature:
-    1.ajout du prix du plan dans le preview de la recommandation des plans à suivres
-    2.finition de la recommandation en ajoutant aussi des recommandation pour l'objectif "atteindre IMC ideal"
+1. mettre à jour dbConception.md pour montrer les nouvelles relations et tables dans base_gestion_regime.sql

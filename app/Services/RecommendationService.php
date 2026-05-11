@@ -118,21 +118,21 @@ class RecommendationService
         $profiles = [
             [
                 'key' => 'conservative',
-                'net_multiplier' => 0.80,
-                'duration_multiplier' => 0.90,
-                'frequency_per_week' => 4,
+                'target_weeks' => 48,
+                'frequency_per_week' => 3,
+                'duration_multiplier' => 0.8,
             ],
             [
                 'key' => 'balanced',
-                'net_multiplier' => 1.00,
-                'duration_multiplier' => 1.00,
+                'target_weeks' => 12,
                 'frequency_per_week' => 5,
+                'duration_multiplier' => 1.0,
             ],
             [
                 'key' => 'intensive',
-                'net_multiplier' => 1.15,
-                'duration_multiplier' => 1.10,
+                'target_weeks' => 4,
                 'frequency_per_week' => 6,
+                'duration_multiplier' => 1.2,
             ],
         ];
 
@@ -148,8 +148,22 @@ class RecommendationService
             for ($idx = 0; $idx < $targetCount; $idx++) {
                 $profile = $profiles[$idx];
 
-                $targetNet = $this->scaleGoalNetByProfile($goalDirection, $baseTargetNet, (float) $profile['net_multiplier']);
-                $targetActivityBurn = $this->getTargetActivityBurn($goalDirection, (int) $profile['frequency_per_week'], (float) $profile['duration_multiplier']);
+                $targetNet = $this->calculateTargetNetFromGoalWeeks(
+                    $goal,
+                    $baseTargetNet,
+                    (int) $profile['target_weeks']
+                );
+
+                $activityMultiplier = $this->calculateActivityMultiplierForWeeks(
+                    (int) $profile['target_weeks'],
+                    $goalDirection
+                );
+
+                $targetActivityBurn = $this->getTargetActivityBurn(
+                    $goalDirection,
+                    (int) $profile['frequency_per_week'],
+                    $activityMultiplier
+                );
 
                 $targetIntakeCalories = (float) $bmr + $targetActivityBurn + $targetNet;
                 if ($goalDirection === 'weight_gain' && $targetIntakeCalories <= (float) $bmr) {
@@ -159,28 +173,65 @@ class RecommendationService
                     $targetIntakeCalories = max(900.0, (float) $bmr - abs($targetNet) - $targetActivityBurn);
                 }
 
-                $portionGrams = $this->calculatePortionGramsForTargetCalories($foodItemIds, $targetIntakeCalories, $goalDirection);
+                $selectedActivities = $this->selectActivitiesForProfile(
+                    $activities,
+                    $goalDirection,
+                    (string) $profile['key']
+                );
+                if (empty($selectedActivities)) {
+                    $selectedActivities = $activities;
+                }
+
+                $selectedActivityIds = array_map(static fn ($row) => (int) $row['id'], $selectedActivities);
 
                 $durationsHours = $this->generateActivityDurationsHours(
-                    $activities,
+                    $selectedActivities,
                     $weightKg,
                     $targetActivityBurn,
+                    (string) $profile['key'],
+                    (int) $profile['frequency_per_week'],
                     (float) $profile['duration_multiplier'],
+                    $goalDirection
+                );
+
+                $activityFrequencies = $this->allocateActivityFrequencies(
+                    $selectedActivities,
+                    $goalDirection,
+                    (string) $profile['key'],
                     (int) $profile['frequency_per_week']
                 );
 
-                $metrics = $this->calculateGenerationMetrics($userId, $draft, $durationsHours, $portionGrams);
+                $metrics = $this->calculateGenerationMetrics(
+                    $userId,
+                    $draft,
+                    $durationsHours,
+                    $targetIntakeCalories,
+                    $goalDirection,
+                    $selectedActivityIds
+                );
 
                 // Ensure the sign matches the intended goal direction.
                 if ($goalDirection === 'weight_gain' && ($metrics['net_gain'] ?? 0) <= 0) {
-                    $portionGrams = $this->calculatePortionGramsForTargetCalories($foodItemIds, $targetIntakeCalories + abs((float) ($metrics['net_gain'] ?? 0)) + 250.0, $goalDirection);
-                    $metrics = $this->calculateGenerationMetrics($userId, $draft, $durationsHours, $portionGrams);
+                    $targetIntakeCalories += abs((float) ($metrics['net_gain'] ?? 0)) + 250.0;
+                    $metrics = $this->calculateGenerationMetrics(
+                        $userId,
+                        $draft,
+                        $durationsHours,
+                        $targetIntakeCalories,
+                        $goalDirection
+                    );
                 } elseif ($goalDirection === 'weight_loss' && ($metrics['net_gain'] ?? 0) >= 0) {
-                    $portionGrams = $this->calculatePortionGramsForTargetCalories($foodItemIds, max(900.0, $targetIntakeCalories - abs((float) ($metrics['net_gain'] ?? 0)) - 250.0), $goalDirection);
-                    $metrics = $this->calculateGenerationMetrics($userId, $draft, $durationsHours, $portionGrams);
+                    $targetIntakeCalories = max(900.0, $targetIntakeCalories - abs((float) ($metrics['net_gain'] ?? 0)) - 250.0);
+                    $metrics = $this->calculateGenerationMetrics(
+                        $userId,
+                        $draft,
+                        $durationsHours,
+                        $targetIntakeCalories,
+                        $goalDirection
+                    );
                 }
 
-                $compositionPreview = $this->buildDietCompositionPreview($draft, $portionGrams, $goalDirection);
+                $compositionPreview = $metrics['composition'] ?? [];
 
                 $recData = [
                     'user_id' => $userId,
@@ -198,12 +249,13 @@ class RecommendationService
                     throw new \RuntimeException('Echec de création d\'une recommandation candidate.');
                 }
 
-                foreach ($activityIds as $activityId) {
+                foreach ($selectedActivityIds as $activityId) {
                     $hours = (float) ($durationsHours[$activityId] ?? 0.0);
+                    $frequency = (int) ($activityFrequencies[$activityId] ?? $profile['frequency_per_week']);
                     $this->recommendationActivitiesModel->insert([
                         'recommendation_id' => $recId,
                         'activity_id' => $activityId,
-                        'frequency_per_week' => (int) $profile['frequency_per_week'],
+                        'frequency_per_week' => $frequency,
                         'duration_minutes' => $hours > 0 ? (int) round($hours * 60) : 0,
                     ]);
                 }
@@ -235,7 +287,9 @@ class RecommendationService
         int $userId,
         array $draft,
         array $activityDurationsHours = [],
-        float $portionGrams = 100.0
+        float $targetCalories = 0.0,
+        string $goalDirection = 'maintenance',
+        ?array $activityIds = null
     ): array {
         $measurement = $this->bodyMeasurementsModel->getLatestByUserId($userId);
         if (empty($measurement)) {
@@ -253,7 +307,7 @@ class RecommendationService
         }
 
         $weightKg = (float) $measurement['weight'];
-        $activityIds = array_values(array_unique(array_map('intval', $draft['activities'] ?? [])));
+        $activityIds = $activityIds ?? array_values(array_unique(array_map('intval', $draft['activities'] ?? [])));
         $activities = $this->activitiesModel->getByIds($activityIds);
 
         $totalActivityBurn = 0.0;
@@ -264,15 +318,8 @@ class RecommendationService
             $totalActivityBurn += $this->calculateActivityCalBurn($met, $weightKg, $durationHours);
         }
 
-        $foodItemIds = [];
-        foreach (($draft['items'] ?? []) as $itemIds) {
-            foreach ((array) $itemIds as $itemId) {
-                $foodItemIds[] = (int) $itemId;
-            }
-        }
-
-        $foodItemIds = array_values(array_unique($foodItemIds));
-        $totalGain = $this->calculateTotalCaloriesGained($foodItemIds, $portionGrams);
+        $composition = $this->buildDietCompositionPreview($draft, $targetCalories, $goalDirection, 1000.0);
+        $totalGain = $this->calculateCaloriesFromComposition($composition);
         $totalBurnt = $this->calculateTotalCaloriesBurnt((float) $bmr, $totalActivityBurn);
         $netGain = $this->calculateNetGain($totalGain, $totalBurnt);
 
@@ -283,8 +330,9 @@ class RecommendationService
             'total_gain' => $totalGain,
             'net_gain' => $netGain,
             'weight_kg' => $weightKg,
-            'portion_grams' => $portionGrams,
+            'daily_intake' => $totalGain,
             'activity_durations_hours' => $activityDurationsHours,
+            'composition' => $composition,
         ];
     }
 
@@ -377,28 +425,55 @@ class RecommendationService
         array $activities,
         float $weightKg,
         float $activityBurnNeeded,
+        string $profileKey,
+        int $frequencyPerWeek,
         float $durationMultiplier,
-        int $frequencyPerWeek
+        string $goalDirection
     ): array {
         $frequencyPerWeek = max(1, $frequencyPerWeek);
         $durationMultiplier = max(0.5, $durationMultiplier);
 
-        $coeff = 0.0;
+        $activityWeights = [];
+        $weightSum = 0.0;
         foreach ($activities as $activity) {
-            $coeff += max(0.0, (float) ($activity['met_value'] ?? 0.0)) * $weightKg;
+            $met = max(0.0, (float) ($activity['met_value'] ?? 0.0));
+            $weight = match ($goalDirection) {
+                'weight_gain' => max(0.1, 1.0 / max(1.0, $met)),
+                'weight_loss' => max(0.1, $met),
+                default => max(0.1, $met),
+            };
+            $activityWeights[(int) $activity['id']] = [
+                'met' => $met,
+                'weight' => $weight,
+            ];
+            $weightSum += $weight;
         }
 
-        $baseHoursPerSession = 0.5;
-        if ($coeff > 0 && $activityBurnNeeded > 0) {
-            $baseHoursPerSession = ($activityBurnNeeded / $coeff) / $frequencyPerWeek;
-        }
+        $minHours = match ($profileKey) {
+            'conservative' => 0.2,
+            'intensive' => 0.6,
+            default => 0.35,
+        };
 
-        $baseHoursPerSession *= $durationMultiplier;
+        $maxHours = 2.0;
 
         $durations = [];
         foreach ($activities as $activity) {
-            $hours = min(2.5, max(0.25, $baseHoursPerSession));
-            $durations[(int) $activity['id']] = round($hours, 2);
+            $activityId = (int) $activity['id'];
+            $meta = $activityWeights[$activityId] ?? ['met' => 0.0, 'weight' => 0.1];
+            $met = (float) $meta['met'];
+            $share = $weightSum > 0 ? ((float) $meta['weight'] / $weightSum) : (1.0 / max(1, count($activities)));
+
+            $hours = $minHours;
+            if ($met > 0 && $activityBurnNeeded > 0) {
+                $activityBurnShare = $activityBurnNeeded * $share;
+                $hours = ($activityBurnShare / ($met * $weightKg)) / $frequencyPerWeek;
+            }
+
+            $hours *= $durationMultiplier;
+
+            $hours = min($maxHours, max($minHours, $hours));
+            $durations[$activityId] = round($hours, 2);
         }
 
         return $durations;
@@ -419,16 +494,63 @@ class RecommendationService
         return $baseBurn * $durationMultiplier;
     }
 
-    private function scaleGoalNetByProfile(string $goalType, float $baseTargetNet, float $profileMultiplier): float
+    private function calculateDesiredDeltaKg(array $goal): ?float
     {
-        $scaled = abs($baseTargetNet) * max(0.5, $profileMultiplier);
+        $minDelta = isset($goal['min_kg']) ? (float) $goal['min_kg'] : null;
+        $maxDelta = isset($goal['max_kg']) ? (float) $goal['max_kg'] : null;
 
-        return match ($goalType) {
-            'weight_gain' => max(250.0, $scaled),
-            'weight_loss' => -max(250.0, $scaled),
-            'imc_rebalance' => $baseTargetNet >= 0 ? max(150.0, $scaled) : -max(150.0, $scaled),
-            default => $baseTargetNet,
-        };
+        $deltaMagnitude = null;
+        if ($minDelta !== null && $maxDelta !== null && $minDelta > 0 && $maxDelta > 0) {
+            $deltaMagnitude = ($minDelta + $maxDelta) / 2.0;
+        } elseif ($minDelta !== null && $minDelta > 0) {
+            $deltaMagnitude = $minDelta;
+        } elseif ($maxDelta !== null && $maxDelta > 0) {
+            $deltaMagnitude = $maxDelta;
+        }
+
+        if ($deltaMagnitude === null) {
+            return null;
+        }
+
+        $goalName = strtolower((string) ($goal['goal_name'] ?? $goal['name'] ?? ''));
+        if (strpos($goalName, 'perte') !== false || strpos($goalName, 'perdre') !== false) {
+            return -abs($deltaMagnitude);
+        }
+
+        if (strpos($goalName, 'prise') !== false || strpos($goalName, 'prendre') !== false) {
+            return abs($deltaMagnitude);
+        }
+
+        return null;
+    }
+
+    private function calculateTargetNetFromGoalWeeks(array $goal, float $fallbackNet, int $weeks): float
+    {
+        $weeks = max(1, $weeks);
+        $desiredDelta = $this->calculateDesiredDeltaKg($goal);
+
+        if ($desiredDelta === null) {
+            return $fallbackNet;
+        }
+
+        return ($desiredDelta * 7700.0) / ($weeks * 7.0);
+    }
+
+    private function calculateActivityMultiplierForWeeks(
+        int $weeks,
+        string $goalDirection,
+        int $balancedWeeks = 12
+    ): float
+    {
+        $weeks = max(1, $weeks);
+        $balancedWeeks = max(1, $balancedWeeks);
+        $multiplier = $balancedWeeks / $weeks;
+
+        if ($goalDirection === 'weight_gain') {
+            $multiplier = 1 / $multiplier;
+        }
+
+        return max(0.5, min(2.0, $multiplier));
     }
 
     private function calculatePortionGramsForTargetCalories(array $foodItemIds, float $targetCalories, string $goalType = 'maintenance'): float
@@ -557,18 +679,23 @@ class RecommendationService
             throw new \RuntimeException('Recommandation candidate invalide.');
         }
 
+        $selectedDietId = (int) ($draft['diet_id'] ?? 0);
+        if ($selectedDietId <= 0) {
+            throw new \RuntimeException('Regime selectionne introuvable.');
+        }
+
         $db = \Config\Database::connect();
         $db->transBegin();
 
         try {
-            $dietResult = $this->generateDietCompositionForCandidate($userId, $draft, $selectedCandidate);
+            $dietResult = $this->generateDietCompositionForCandidate($userId, $selectedRecommendationId, $draft, $selectedCandidate);
 
             foreach ($candidateIds as $candidateId) {
                 $status = $candidateId === $selectedRecommendationId ? 'selected' : 'discarded';
 
                 $updateData = ['status' => $status];
                 if ($candidateId === $selectedRecommendationId) {
-                    $updateData['diet_id'] = $dietResult['diet_id'];
+                    $updateData['diet_id'] = $selectedDietId;
                 }
 
                 $updated = $this->recommendationModel
@@ -592,7 +719,7 @@ class RecommendationService
     }
 
 
-public function generateDietCompositionForCandidate(int $userId, array $draft, array $candidate): array
+public function generateDietCompositionForCandidate(int $userId, int $recommendationId, array $draft, array $candidate): array
 {
     $measurement = $this->bodyMeasurementsModel->getLatestByUserId($userId);
 
@@ -617,84 +744,34 @@ public function generateDietCompositionForCandidate(int $userId, array $draft, a
     }
 
     $goalType = (string) ($candidate['goal_type'] ?? 'candidate');
-    $profile = (string) ($candidate['profile'] ?? 'balanced');
-    $targetNet = (float) ($candidate['target_net'] ?? 0.0);
-
-    $dietName = sprintf(
-        'Plan %s - %s',
-        ucfirst($profile),
-        ucfirst(str_replace('_', ' ', $goalType))
-    );
-
-    $dietDescription = sprintf(
-        'Plan journalier généré pour %s avec un apport cible de %.0f kcal et des quantités à consommer sur une journée entière.',
-        $goalType,
-        $targetCalories
-    );
-
-    $dietId = $this->dietsModel->insert([
-        'name' => $dietName,
-        'description' => $dietDescription,
-    ], true);
-
-    if (!$dietId) {
-        throw new \RuntimeException('Impossible de créer le plan alimentaire.');
+    $dietId = (int) ($draft['diet_id'] ?? 0);
+    if ($dietId <= 0) {
+        throw new \RuntimeException('Regime selectionne introuvable.');
     }
+
+    $dietRow = $this->dietsModel->find($dietId);
+    if (empty($dietRow)) {
+        throw new \RuntimeException('Regime selectionne introuvable.');
+    }
+
+    $dietName = $dietRow['name'] ?? 'Regime';
+    $dietDescription = $dietRow['description'] ?? null;
 
     $composition = $this->buildDietCompositionPreview(
         $draft,
         $targetCalories,
-        $goalType
+        $goalType,
+        1000.0
     );
 
-    $totalWeight = 0.0;
-
-    foreach ($composition as $section) {
-        foreach ($section['items'] as $itemRow) {
-            $totalWeight += (float) $itemRow['quantity_grams'];
-        }
-    }
-
-    $minimumDailyWeight = 1500.0;
-
-    if ($totalWeight > 0 && $totalWeight < $minimumDailyWeight) {
-
-        $scaleFactor = $minimumDailyWeight / $totalWeight;
-
-        foreach ($composition as &$section) {
-
-            foreach ($section['items'] as &$itemRow) {
-
-                $newQuantity = round(
-                    $itemRow['quantity_grams'] * $scaleFactor,
-                    2
-                );
-
-                if ($newQuantity < 50) {
-                    $newQuantity = 50;
-                }
-
-                $itemRow['quantity_grams'] = $newQuantity;
-            }
-        }
-
-        unset($section, $itemRow);
-    }
-
-    foreach ($draft['distributions'] as $categoryId => $percentage) {
-
-        $this->foodDistributionsModel->insert([
-            'diet_id' => $dietId,
-            'category_id' => (int) $categoryId,
-            'percentage' => (float) $percentage,
-        ]);
-    }
+    $totalWeight = $this->calculateTotalWeightFromComposition($composition);
 
     foreach ($composition as $section) {
 
         foreach ($section['items'] as $itemRow) {
 
             $this->dietCompositionsModel->insert([
+                'recommendation_id' => $recommendationId,
                 'diet_id' => $dietId,
                 'food_item_id' => (int) $itemRow['food_item_id'],
                 'quantity' => (float) $itemRow['quantity_grams'],
@@ -723,14 +800,19 @@ public function generateDietCompositionForCandidate(int $userId, array $draft, a
         return 'candidate';
     }
 
-    private function buildDietCompositionPreview(array $draft, float $targetCalories, string $goalType): array
+    private function buildDietCompositionPreview(
+        array $draft,
+        float $targetCalories,
+        string $goalType,
+        float $minWeightGrams = 1000.0
+    ): array
     {
         $foodItemsById = [];
         foreach ($this->foodItemsModel->getByIds($this->extractUniqueFoodItemIds($draft)) as $item) {
             $foodItemsById[(int) $item['id']] = $item;
         }
 
-        $itemsByCategory = $this->groupDraftItemsByCategory($draft);
+        $itemsByCategory = $this->groupDraftItemsByCategory($draft, $goalType);
         $preview = [];
 
         foreach (($draft['distributions'] ?? []) as $categoryId => $percentage) {
@@ -777,14 +859,75 @@ public function generateDietCompositionForCandidate(int $userId, array $draft, a
             ];
         }
 
+        $totalWeight = $this->calculateTotalWeightFromComposition($preview);
+        if ($totalWeight > 0 && $totalWeight < $minWeightGrams) {
+            $scaleFactor = $minWeightGrams / $totalWeight;
+            foreach ($preview as &$section) {
+                foreach ($section['items'] as &$item) {
+                    $item['quantity_grams'] = round($item['quantity_grams'] * $scaleFactor, 2);
+                    $item['allocated_calories'] = round(($item['quantity_grams'] * $item['calories_per_100g']) / 100.0, 2);
+                }
+            }
+            unset($section, $item);
+        }
+
         return $preview;
     }
 
-    private function groupDraftItemsByCategory(array $draft): array
+    private function calculateCaloriesFromComposition(array $composition): float
+    {
+        $total = 0.0;
+        foreach ($composition as $section) {
+            foreach (($section['items'] ?? []) as $item) {
+                $grams = (float) ($item['quantity_grams'] ?? 0.0);
+                $calPer100 = (float) ($item['calories_per_100g'] ?? 0.0);
+                if ($grams > 0 && $calPer100 > 0) {
+                    $total += ($grams * $calPer100) / 100.0;
+                }
+            }
+        }
+
+        return round($total, 2);
+    }
+
+    private function calculateTotalWeightFromComposition(array $composition): float
+    {
+        $total = 0.0;
+        foreach ($composition as $section) {
+            foreach (($section['items'] ?? []) as $item) {
+                $total += (float) ($item['quantity_grams'] ?? 0.0);
+            }
+        }
+
+        return $total;
+    }
+
+    private function groupDraftItemsByCategory(array $draft, string $goalDirection = 'maintenance'): array
     {
         $grouped = [];
         foreach (($draft['items'] ?? []) as $categoryId => $itemIds) {
-            $grouped[(int) $categoryId] = array_values(array_unique(array_map('intval', (array) $itemIds)));
+            $ids = array_values(array_unique(array_map('intval', (array) $itemIds)));
+            $items = $this->foodItemsModel->getByIds($ids);
+            if (empty($items)) {
+                continue;
+            }
+
+            usort($items, static function ($a, $b) {
+                $aCal = (float) ($a['calories_per_100g'] ?? 0.0);
+                $bCal = (float) ($b['calories_per_100g'] ?? 0.0);
+                return $aCal <=> $bCal;
+            });
+
+            if ($goalDirection === 'weight_gain') {
+                $items = array_reverse($items);
+            }
+
+            $take = max(1, (int) ceil(count($items) * 0.6));
+            $items = array_slice($items, 0, $take);
+
+            $grouped[(int) $categoryId] = array_values(array_map(static function ($row) {
+                return (int) $row['id'];
+            }, $items));
         }
 
         return $grouped;
@@ -815,12 +958,9 @@ private function allocateCategoryCalories(
         $weight = 1.0;
 
         if ($goalDirection === 'weight_loss') {
-
-            $weight = max(0.5, 300.0 / $calories);
-
+            $weight = max(0.1, 1.0 / pow($calories, 1.1));
         } elseif ($goalDirection === 'weight_gain') {
-
-            $weight = max(1.0, $calories / 100.0);
+            $weight = max(0.1, pow($calories, 1.1));
         }
 
         $items[] = [
@@ -851,8 +991,8 @@ private function allocateCategoryCalories(
             2
         );
         
-        if ($allocatedCalories < 100) {
-            $allocatedCalories = 100;
+        if ($allocatedCalories < 50) {
+            $allocatedCalories = 50;
         }
 
         $allocated[$item['id']] = $allocatedCalories;
@@ -948,5 +1088,96 @@ private function allocateCategoryCalories(
             'days_to_goal' => $daysToGoal,
             'target_weight_kg' => $currentWeight !== null ? $currentWeight + $desiredDelta : null,
         ];
+    }
+
+    private function allocateActivityFrequencies(
+        array $activities,
+        string $goalDirection,
+        string $profileKey,
+        int $profileFrequency
+    ): array {
+        $activities = array_values(array_filter($activities, static function ($activity) {
+            return isset($activity['id']);
+        }));
+
+        if (empty($activities)) {
+            return [];
+        }
+
+        $weights = [];
+        $weightSum = 0.0;
+        foreach ($activities as $activity) {
+            $met = max(0.0, (float) ($activity['met_value'] ?? 0.0));
+            $weight = match ($goalDirection) {
+                'weight_gain' => max(0.1, 1.0 / max(1.0, $met)),
+                'weight_loss' => max(0.1, $met),
+                default => max(0.1, $met),
+            };
+            $weights[(int) $activity['id']] = $weight;
+            $weightSum += $weight;
+        }
+
+        $count = count($activities);
+        $totalSessions = max($profileFrequency, $count);
+
+        $frequencies = [];
+        $remainders = [];
+        $assigned = 0;
+        foreach ($weights as $activityId => $weight) {
+            $raw = ($weightSum > 0) ? ($totalSessions * ($weight / $weightSum)) : ($totalSessions / $count);
+            $base = max(1, (int) floor($raw));
+            $frequencies[$activityId] = $base;
+            $remainders[$activityId] = $raw - $base;
+            $assigned += $base;
+        }
+
+        $remaining = $totalSessions - $assigned;
+        if ($remaining > 0) {
+            arsort($remainders);
+            foreach ($remainders as $activityId => $remainder) {
+                if ($remaining <= 0) {
+                    break;
+                }
+                $frequencies[$activityId]++;
+                $remaining--;
+            }
+        }
+
+        return $frequencies;
+    }
+
+    private function selectActivitiesForProfile(array $activities, string $goalDirection, string $profileKey): array
+    {
+        $activities = array_values(array_filter($activities, static function ($activity) {
+            return isset($activity['id']);
+        }));
+
+        if (count($activities) <= 1) {
+            return $activities;
+        }
+
+        usort($activities, static function ($a, $b) {
+            $metA = (float) ($a['met_value'] ?? 0.0);
+            $metB = (float) ($b['met_value'] ?? 0.0);
+            return $metA <=> $metB;
+        });
+
+        $count = count($activities);
+        $take = match ($profileKey) {
+            'conservative' => max(1, (int) ceil($count * 0.4)),
+            'intensive' => max(1, (int) ceil($count * 0.7)),
+            default => max(1, (int) ceil($count * 0.55)),
+        };
+
+        if ($goalDirection === 'weight_gain') {
+            return array_slice($activities, 0, $take);
+        }
+
+        if ($goalDirection === 'weight_loss') {
+            return array_slice($activities, max(0, $count - $take));
+        }
+
+        $start = max(0, (int) floor(($count - $take) / 2));
+        return array_slice($activities, $start, $take);
     }
 }

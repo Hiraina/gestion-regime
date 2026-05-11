@@ -103,6 +103,20 @@
                     </div>
 
                     <div class="summary-entry">
+                        <strong>Prix total estimé</strong>
+                        <?php if (isset($dietPricePerDay) && $dietPricePerDay !== null): ?>
+                            <?php if ($candidate['estimated_days_to_goal'] !== null): ?>
+                                <?php $totalPrice = $dietPricePerDay * (int) $candidate['estimated_days_to_goal']; ?>
+                                <span><?= esc(number_format($totalPrice, 2)) ?> EUR</span>
+                            <?php else: ?>
+                                <span><?= esc(number_format($dietPricePerDay, 2)) ?> EUR / jour</span>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span>Non disponible</span>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="summary-entry">
                         <strong>Plan d'activités généré</strong>
                         <?php if (!empty($candidate['activities'])): ?>
                             <ul>

@@ -99,9 +99,14 @@
                 <span class="goal-date">Depuis le <?= esc(date('d/m/Y', strtotime($current_goal->start_date))) ?></span>
             </div>
         </div>
-        <a href="<?= base_url('recommendations') ?>" class="recommendations-link">
-            <i class="fas fa-clipboard-list"></i> Voir régimes & activités recommandés
-        </a>
+        <div class="recommendations-actions">
+            <a href="<?= base_url('recommendations') ?>" class="recommendations-link">
+                <i class="fas fa-clipboard-list"></i> Générer une recommandation
+            </a>
+            <a href="<?= base_url('recommendations/selected') ?>" class="recommendations-link">
+                <i class="fas fa-check"></i> Voir le plan validé
+            </a>
+        </div>
     </div>
     <?php else: ?>
     <div class="current-goal empty">

@@ -5,7 +5,12 @@ namespace App\Controllers\Front;
 use App\Controllers\BaseController;
 use App\Models\ActivitiesModel;
 use App\Models\FoodCategoriesModel;
+use App\Models\FoodDistributionsModel;
 use App\Models\FoodItemsModel;
+use App\Models\DietsModel;
+use App\Models\DietCompositionsModel;
+use App\Models\RecommendationActivitiesModel;
+use App\Models\RecommendationsModel;
 use App\Models\UsersModel;
 
 class RecommendationController extends BaseController
@@ -20,10 +25,8 @@ class RecommendationController extends BaseController
 
     public function step1()
     {
-        $categoryModel = new FoodCategoriesModel();
-
         return view('recommendations/step1', [
-            'categories' => $categoryModel->orderBy('name', 'ASC')->findAll(),
+            'dietOptions' => $this->buildDietOptions(),
             'draft' => $this->getDraft(),
             'error' => session()->getFlashdata('error')
         ]);
@@ -31,37 +34,22 @@ class RecommendationController extends BaseController
 
     public function saveStep1()
     {
-        $categories = (new FoodCategoriesModel())->orderBy('name', 'ASC')->findAll();
-        $categoryIds = array_column($categories, 'id');
-        $postedDistributions = $this->request->getPost('distributions') ?? [];
+        $dietId = (int) $this->request->getPost('diet_id');
+        $dietOptions = $this->buildDietOptions();
+        $dietIds = array_column($dietOptions, 'id');
 
-        $cleanDistributions = [];
-        $total = 0.0;
-
-        foreach ($categoryIds as $categoryId) {
-            $value = $postedDistributions[$categoryId] ?? 0;
-            $value = is_numeric($value) ? (float) $value : 0.0;
-
-            if ($value < 0 || $value > 100) {
-                return $this->renderStep1WithError($categories, $postedDistributions, 'Chaque pourcentage doit être compris entre 0 et 100.');
-            }
-
-            if ($value > 0) {
-                $cleanDistributions[$categoryId] = $value;
-                $total += $value;
-            }
+        if ($dietId <= 0 || !in_array($dietId, $dietIds, true)) {
+            return $this->renderStep1WithError($dietOptions, $dietId, 'Veuillez sélectionner un régime.');
         }
 
-        if ($total <= 0) {
-            return $this->renderStep1WithError($categories, $postedDistributions, 'Choisissez au moins une catégorie de nourriture.');
-        }
-
-        if ($total != 100) {
-            return $this->renderStep1WithError($categories, $postedDistributions, 'Le total des distributions doit être exactement 100 %.');
+        $distributions = $this->getDietDistributions($dietId);
+        if (empty($distributions)) {
+            return $this->renderStep1WithError($dietOptions, $dietId, 'Le régime sélectionné ne contient aucune distribution.');
         }
 
         $draft = $this->getDraft();
-        $draft['distributions'] = $cleanDistributions;
+        $draft['diet_id'] = $dietId;
+        $draft['distributions'] = $distributions;
         unset($draft['items'], $draft['activities']);
         $this->saveDraft($draft);
 
@@ -300,11 +288,86 @@ class RecommendationController extends BaseController
         }
 
         $dietPreview = $this->buildDietPreviewFromDraft($draft);
+        $dietPricePerDay = null;
+        if (!empty($draft['diet_id'])) {
+            $pricingModel = new \App\Models\DietDurationPricingModel();
+            $pricingRow = $pricingModel->where('diet_id', (int) $draft['diet_id'])->first();
+            if (is_array($pricingRow)) {
+                if (array_key_exists('price_per_day', $pricingRow) && $pricingRow['price_per_day'] !== null) {
+                    $dietPricePerDay = (float) $pricingRow['price_per_day'];
+                } elseif (array_key_exists('price', $pricingRow) && $pricingRow['price'] !== null) {
+                    $dietPricePerDay = (float) $pricingRow['price'];
+                }
+            }
+        }
 
         return view('recommendations/candidates', [
             'candidates' => $candidates,
             'dietPreview' => $dietPreview,
+            'dietPricePerDay' => $dietPricePerDay,
             'error' => session()->getFlashdata('error'),
+        ]);
+    }
+
+    public function selected()
+    {
+        $userId = $this->authService->getUserIdOrFail();
+        $recommendationModel = new RecommendationsModel();
+        $recommendation = $recommendationModel
+            ->where('user_id', $userId)
+            ->where('status', 'selected')
+            ->orderBy('generated_at', 'DESC')
+            ->first();
+
+        if (empty($recommendation)) {
+            return redirect()->to(base_url('recommendations/step1'))->with('error', 'Aucun plan validé pour le moment.');
+        }
+
+        $diet = null;
+        if (!empty($recommendation['diet_id'])) {
+            $diet = (new DietsModel())->find((int) $recommendation['diet_id']);
+        }
+
+        $activities = (new RecommendationActivitiesModel())
+            ->select('recommendation_activities.frequency_per_week, recommendation_activities.duration_minutes, activities.name AS activity_name')
+            ->join('activities', 'activities.id = recommendation_activities.activity_id', 'left')
+            ->where('recommendation_activities.recommendation_id', (int) $recommendation['id'])
+            ->orderBy('activities.name', 'ASC')
+            ->findAll();
+
+        $compositionRows = (new DietCompositionsModel())
+            ->select('diet_compositions.quantity, food_items.name AS food_name, food_categories.name AS category_name')
+            ->join('food_items', 'food_items.id = diet_compositions.food_item_id', 'left')
+            ->join('food_categories', 'food_categories.id = food_items.category_id', 'left')
+            ->where('diet_compositions.recommendation_id', (int) $recommendation['id'])
+            ->orderBy('food_categories.name', 'ASC')
+            ->findAll();
+
+        $composition = [];
+        foreach ($compositionRows as $row) {
+            $category = $row['category_name'] ?? 'Categorie';
+            if (!isset($composition[$category])) {
+                $composition[$category] = [];
+            }
+            $composition[$category][] = [
+                'name' => $row['food_name'] ?? 'Aliment',
+                'quantity_grams' => (float) ($row['quantity'] ?? 0),
+            ];
+        }
+
+        $compositionList = [];
+        foreach ($composition as $category => $items) {
+            $compositionList[] = [
+                'category' => $category,
+                'items' => $items,
+            ];
+        }
+
+        return view('recommendations/selected', [
+            'recommendation' => $recommendation,
+            'diet' => $diet,
+            'composition' => $compositionList,
+            'activities' => $activities,
         ]);
     }
 
@@ -373,13 +436,69 @@ class RecommendationController extends BaseController
         return [$activeCategories, $itemsByCategory];
     }
 
-    private function renderStep1WithError(array $categories, array $postedDistributions, string $message)
+    private function renderStep1WithError(array $dietOptions, int $dietId, string $message)
     {
         return view('recommendations/step1', [
-            'categories' => $categories,
-            'draft' => ['distributions' => $postedDistributions],
+            'dietOptions' => $dietOptions,
+            'draft' => ['diet_id' => $dietId],
             'error' => $message
         ]);
+    }
+
+    private function buildDietOptions(): array
+    {
+        $diets = (new DietsModel())->orderBy('name', 'ASC')->findAll();
+        $categories = (new FoodCategoriesModel())->findAll();
+
+        $categoryNames = [];
+        foreach ($categories as $category) {
+            $categoryNames[(int) $category['id']] = $category['name'];
+        }
+
+        $rows = (new FoodDistributionsModel())->findAll();
+        $byDiet = [];
+        foreach ($rows as $row) {
+            $dietId = (int) $row['diet_id'];
+            $percentage = (float) ($row['percentage'] ?? 0);
+            if ($percentage <= 0) {
+                continue;
+            }
+
+            $byDiet[$dietId][] = [
+                'category' => $categoryNames[(int) $row['category_id']] ?? 'Categorie',
+                'percentage' => $percentage,
+            ];
+        }
+
+        $options = [];
+        foreach ($diets as $diet) {
+            $dietId = (int) $diet['id'];
+            $options[] = [
+                'id' => $dietId,
+                'name' => $diet['name'],
+                'categories' => $byDiet[$dietId] ?? [],
+            ];
+        }
+
+        return $options;
+    }
+
+    private function getDietDistributions(int $dietId): array
+    {
+        $rows = (new FoodDistributionsModel())
+            ->where('diet_id', $dietId)
+            ->findAll();
+
+        $distributions = [];
+        foreach ($rows as $row) {
+            $percentage = (float) ($row['percentage'] ?? 0);
+            if ($percentage <= 0) {
+                continue;
+            }
+            $distributions[(int) $row['category_id']] = $percentage;
+        }
+
+        return $distributions;
     }
 
     private function renderStep2WithError(array $activeCategories, array $itemsByCategory, array $draft, string $message)

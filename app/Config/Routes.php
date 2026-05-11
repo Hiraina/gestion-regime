@@ -48,6 +48,9 @@ $routes->group('gold', function($routes){
 });
 
 $routes->group('diets', function($routes){
+    $routes->get('manage-test', 'Front\\DietCrudControllerTest::index');
+    $routes->post('create-test', 'Front\\DietCrudControllerTest::create');
+    $routes->post('delete-test/(:num)', 'Front\\DietCrudControllerTest::delete/$1');
     $routes->post('purchase', 'Front\DietPurchaseController::purchase');
 });
 
@@ -67,6 +70,7 @@ $routes->group('recommendations', function($routes){
     $routes->get('step4', 'Front\RecommendationController::step4');
     $routes->post('submit', 'Front\RecommendationController::submit');
     $routes->get('candidates', 'Front\RecommendationController::candidates');
+    $routes->get('selected', 'Front\\RecommendationController::selected');
     $routes->post('choose/(:num)', 'Front\RecommendationController::chooseCandidate/$1');
     $routes->get('clear', 'Front\RecommendationController::clear');
 });

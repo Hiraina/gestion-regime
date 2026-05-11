@@ -6,15 +6,14 @@ use CodeIgniter\Model;
 
 class DietCompositionsModel extends Model
 {
-    protected $table = 'diet_compositions';
+	protected $table = 'diet_compositions';
 
-    protected $primaryKey = 'diet_id';
+	protected $primaryKey = 'id';
 
-    protected $useAutoIncrement = false;
-
-    protected $allowedFields = [
-        'diet_id',
-        'food_item_id',
-        'quantity'
-    ];
+	protected $allowedFields = [
+		'recommendation_id',
+		'diet_id',
+		'food_item_id',
+		'quantity'
+	];
 }
