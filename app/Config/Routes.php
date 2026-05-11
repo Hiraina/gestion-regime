@@ -18,12 +18,20 @@ $routes->get('profile/complete', 'Front\ProfileController::complete');
 $routes->post('profile/complete', 'Front\ProfileController::saveCompletion');
 
 $routes->group('admin', static function ($routes) {
+    $routes->get('/', 'Admin\DashboardController::index');
+    $routes->get('dashboard', 'Admin\DashboardController::index');
     $routes->get('diets', 'Admin\DietsController::index');
     $routes->get('diets/create', 'Admin\DietsController::create');
     $routes->post('diets', 'Admin\DietsController::store');
     $routes->get('diets/(:num)/edit', 'Admin\DietsController::edit/$1');
     $routes->post('diets/(:num)', 'Admin\DietsController::update/$1');
     $routes->post('diets/(:num)/delete', 'Admin\DietsController::delete/$1');
+    $routes->get('activities', 'Admin\ActivitiesController::index');
+    $routes->get('activities/create', 'Admin\ActivitiesController::create');
+    $routes->post('activities', 'Admin\ActivitiesController::store');
+    $routes->get('activities/(:num)/edit', 'Admin\ActivitiesController::edit/$1');
+    $routes->post('activities/(:num)', 'Admin\ActivitiesController::update/$1');
+    $routes->post('activities/(:num)/delete', 'Admin\ActivitiesController::delete/$1');
 });
 
 $routes->group('health', function($routes){
