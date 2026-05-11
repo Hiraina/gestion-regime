@@ -23,4 +23,10 @@ class CodesModel extends Model
         'code_value' => 'required|max_length[50]',
         'amount'     => 'required|decimal',
     ];
+
+    public function getCodeUnusedValue(){
+        $this->select('code_value, amount')
+            ->where('used_by_user_id', null)
+            ->first();
+    }
 }
