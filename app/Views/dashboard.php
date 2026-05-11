@@ -91,10 +91,13 @@
             </div>
             <div class="current-goal-body">
                 <strong><?= esc($current_goal->goal_name) ?></strong>
-                <?php if ($current_goal->min_kg && $current_goal->max_kg): ?>
+                <?php if ($current_goal->min_kg !== null && $current_goal->max_kg !== null): ?>
                     <span class="weight-range">
                         Variation de poids souhaitée : <?= esc($current_goal->min_kg) ?> – <?= esc($current_goal->max_kg) ?> kg
                     </span>
+                <?php endif; ?>
+                <?php if (!empty($current_goal->goal_direction_label)): ?>
+                    <span class="weight-direction">Objectif : <?= esc($current_goal->goal_direction_label) ?></span>
                 <?php endif; ?>
                 <span class="goal-date">Depuis le <?= esc(date('d/m/Y', strtotime($current_goal->start_date))) ?></span>
             </div>
@@ -372,8 +375,9 @@ function updateCurrentGoalUI(goal) {
                 </div>
                 <div class="current-goal-body">
                     <strong>${goal.goal_name}</strong>
-                    ${goal.min_kg && goal.max_kg ? 
+                    ${(goal.min_kg !== null && goal.max_kg !== null) ? 
                         `<span class="weight-range">Variation de poids souhaitée : ${goal.min_kg} – ${goal.max_kg} kg</span>` : ''}
+                    ${goal.goal_direction_label ? `<span class="weight-direction">Objectif : ${goal.goal_direction_label}</span>` : ''}
                     <span class="goal-date">Depuis le ${new Date(goal.start_date).toLocaleDateString('fr-FR')}</span>
                 </div>
             </div>

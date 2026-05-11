@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\BodyMeasurementsModel;
 use Config\Database;
 
 class GoalController extends BaseController
@@ -50,27 +51,7 @@ public function save()
         return $this->respondWithMessage(false, 'Objectif invalide');
     }
 
-    // Les cartes du dashboard utilisent une logique métier (gain / perte / IMC)
-    // qui ne correspond pas forcément aux IDs bruts en base.
-    $goalNameMap = [
-        1 => 'Prise de poids',
-        2 => 'Perte de poids',
-        3 => 'IMC idéal',
-    ];
-
-    if (isset($goalNameMap[(int) $goalId])) {
-        $goal = $db->table('goals')
-            ->where('name', $goalNameMap[(int) $goalId])
-            ->orderBy('id', 'DESC')
-            ->get()
-            ->getRow();
-
-        if (!$goal) {
-            return $this->respondWithMessage(false, 'Objectif métier introuvable en base.');
-        }
-
-        $goalId = $goal->id;
-    }
+    // Use the goal ID sent by the client as-is.
 
     $data = [
         'user_id'    => $userId,
@@ -79,6 +60,8 @@ public function save()
         'min_kg'     => null,
         'max_kg'     => null
     ];
+
+    $goalDirectionLabel = null;
 
     // Objectifs nécessitant une fourchette de poids
     if (in_array((int) $goal->id, [1, 2], true) || in_array($goal->name, ['Prise de poids', 'Perte de poids'], true)) {
@@ -94,6 +77,36 @@ public function save()
         $data['max_kg'] = $maxKg;
     }
 
+    if (stripos((string) $goal->name, 'imc') !== false) {
+        $measurement = (new BodyMeasurementsModel())->getLatestByUserId($userId);
+        if (empty($measurement) || empty($measurement['height']) || empty($measurement['weight'])) {
+            return $this->respondWithMessage(false, 'Veuillez compléter votre taille et poids avant de fixer cet objectif.');
+        }
+
+        $heightMeters = ((float) $measurement['height']) / 100.0;
+        if ($heightMeters <= 0) {
+            return $this->respondWithMessage(false, 'Taille invalide pour le calcul IMC.');
+        }
+
+        $minIdealWeight = 18.5 * $heightMeters * $heightMeters;
+        $maxIdealWeight = 24.9 * $heightMeters * $heightMeters;
+        $currentWeight = (float) $measurement['weight'];
+
+        if ($currentWeight < $minIdealWeight) {
+            $data['min_kg'] = round($minIdealWeight - $currentWeight, 1);
+            $data['max_kg'] = round($maxIdealWeight - $currentWeight, 1);
+            $goalDirectionLabel = 'Prise de poids';
+        } elseif ($currentWeight > $maxIdealWeight) {
+            $data['min_kg'] = round($currentWeight - $maxIdealWeight, 1);
+            $data['max_kg'] = round($currentWeight - $minIdealWeight, 1);
+            $goalDirectionLabel = 'Perte de poids';
+        } else {
+            $data['min_kg'] = 0.0;
+            $data['max_kg'] = 0.0;
+            $goalDirectionLabel = 'Stabilisation';
+        }
+    }
+
     // Insertion
     $db->table('user_goals')->insert($data);
     $insertId = $db->insertID();
@@ -105,6 +118,10 @@ public function save()
         ->where('user_goals.id', $insertId)
         ->get()
         ->getRow();
+
+    if ($insertedGoal && $goalDirectionLabel !== null) {
+        $insertedGoal->goal_direction_label = $goalDirectionLabel;
+    }
 
     return $this->respondWithMessage(true, 'Objectif enregistré avec succès !', $insertedGoal);
 }
