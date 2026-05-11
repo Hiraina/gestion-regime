@@ -1,0 +1,108 @@
+ERROR - 2026-05-09 16:48:12 --> Error connecting to the database: mysqli_sql_exception: Access denied for user 'root'@'localhost' in /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(555): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(795): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1706): CodeIgniter\Database\BaseConnection->query()
+#4 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1726): CodeIgniter\Database\BaseConnection->listTables()
+#5 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(821): CodeIgniter\Database\BaseConnection->tableExists()
+#6 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(173): CodeIgniter\Database\MigrationRunner->ensureTable()
+#7 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest()
+#8 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+#9 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked()
+#10 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Commands.php(74): CodeIgniter\Commands\Database\Migrate->run()
+#11 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Console.php(47): CodeIgniter\CLI\Commands->run()
+#12 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(442): CodeIgniter\CLI\Console->run()
+#13 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(166): CodeIgniter\Boot::runCommand()
+#14 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/spark(87): CodeIgniter\Boot::bootSpark()
+#15 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Access denied for user '****'@'localhost' in /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php:231
+Stack trace:
+#0 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(555): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(795): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1706): CodeIgniter\Database\BaseConnection->query()
+#3 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1726): CodeIgniter\Database\BaseConnection->listTables()
+#4 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(821): CodeIgniter\Database\BaseConnection->tableExists()
+#5 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(173): CodeIgniter\Database\MigrationRunner->ensureTable()
+#6 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest()
+#7 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+#8 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked()
+#9 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Commands.php(74): CodeIgniter\Commands\Database\Migrate->run()
+#10 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Console.php(47): CodeIgniter\CLI\Commands->run()
+#11 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(442): CodeIgniter\CLI\Console->run()
+#12 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(166): CodeIgniter\Boot::runCommand()
+#13 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/spark(87): CodeIgniter\Boot::bootSpark()
+#14 {main}
+ERROR - 2026-05-09 16:57:29 --> Error connecting to the database: mysqli_sql_exception: Access denied for user 'root'@'localhost' in /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(555): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(795): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1706): CodeIgniter\Database\BaseConnection->query()
+#4 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1726): CodeIgniter\Database\BaseConnection->listTables()
+#5 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(821): CodeIgniter\Database\BaseConnection->tableExists()
+#6 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(173): CodeIgniter\Database\MigrationRunner->ensureTable()
+#7 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest()
+#8 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+#9 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked()
+#10 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Commands.php(74): CodeIgniter\Commands\Database\Migrate->run()
+#11 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Console.php(47): CodeIgniter\CLI\Commands->run()
+#12 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(442): CodeIgniter\CLI\Console->run()
+#13 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(166): CodeIgniter\Boot::runCommand()
+#14 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/spark(87): CodeIgniter\Boot::bootSpark()
+#15 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Access denied for user '****'@'localhost' in /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php:231
+Stack trace:
+#0 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(555): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(795): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1706): CodeIgniter\Database\BaseConnection->query()
+#3 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1726): CodeIgniter\Database\BaseConnection->listTables()
+#4 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(821): CodeIgniter\Database\BaseConnection->tableExists()
+#5 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(173): CodeIgniter\Database\MigrationRunner->ensureTable()
+#6 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest()
+#7 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+#8 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked()
+#9 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Commands.php(74): CodeIgniter\Commands\Database\Migrate->run()
+#10 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Console.php(47): CodeIgniter\CLI\Commands->run()
+#11 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(442): CodeIgniter\CLI\Console->run()
+#12 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(166): CodeIgniter\Boot::runCommand()
+#13 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/spark(87): CodeIgniter\Boot::bootSpark()
+#14 {main}
+ERROR - 2026-05-09 17:22:56 --> Error connecting to the database: mysqli_sql_exception: Access denied for user 'root'@'localhost' in /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(555): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(795): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1706): CodeIgniter\Database\BaseConnection->query()
+#4 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1726): CodeIgniter\Database\BaseConnection->listTables()
+#5 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(821): CodeIgniter\Database\BaseConnection->tableExists()
+#6 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(173): CodeIgniter\Database\MigrationRunner->ensureTable()
+#7 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest()
+#8 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+#9 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked()
+#10 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Commands.php(74): CodeIgniter\Commands\Database\Migrate->run()
+#11 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Console.php(47): CodeIgniter\CLI\Commands->run()
+#12 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(442): CodeIgniter\CLI\Console->run()
+#13 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(166): CodeIgniter\Boot::runCommand()
+#14 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/spark(87): CodeIgniter\Boot::bootSpark()
+#15 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Access denied for user '****'@'localhost' in /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MySQLi/Connection.php:231
+Stack trace:
+#0 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(555): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(795): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1706): CodeIgniter\Database\BaseConnection->query()
+#3 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/BaseConnection.php(1726): CodeIgniter\Database\BaseConnection->listTables()
+#4 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(821): CodeIgniter\Database\BaseConnection->tableExists()
+#5 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Database/MigrationRunner.php(173): CodeIgniter\Database\MigrationRunner->ensureTable()
+#6 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest()
+#7 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+#8 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Commands/Database/Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked()
+#9 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Commands.php(74): CodeIgniter\Commands\Database\Migrate->run()
+#10 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/CLI/Console.php(47): CodeIgniter\CLI\Commands->run()
+#11 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(442): CodeIgniter\CLI\Console->run()
+#12 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(166): CodeIgniter\Boot::runCommand()
+#13 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/spark(87): CodeIgniter\Boot::bootSpark()
+#14 {main}

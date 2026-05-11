@@ -22,6 +22,7 @@ class RegisterController extends BaseController
             'full_name' => trim((string) $this->request->getPost('full_name')),
             'email' => trim((string) $this->request->getPost('email')),
             'gender' => (string) $this->request->getPost('gender'),
+            'date_of_birth' => (string) $this->request->getPost('date_of_birth'),
             'password_hash' => password_hash((string) $this->request->getPost('password'), PASSWORD_DEFAULT),
             'created_at' => date('Y-m-d H:i:s'),
         ]);
@@ -64,6 +65,6 @@ class RegisterController extends BaseController
         ]);
 
         // Later, register_step1 + register_health can be saved into users and body_measurements.
-        return redirect()->to(base_url('login'));
+        return redirect()->to(base_url('profile/complete'));
     }
 }

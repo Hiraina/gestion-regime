@@ -86,6 +86,17 @@
                 </div>
 
                 <div class="field">
+                    <label for="dateOfBirth">Date de naissance</label>
+                    <input
+                        type="date"
+                        id="dateOfBirth"
+                        name="date_of_birth"
+                        autocomplete="bday"
+                    >
+                    <small class="error-message" id="dateOfBirthError"></small>
+                </div>
+
+                <div class="field">
                     <label for="password">Mot de passe</label>
                     <div class="password-field">
                         <input

@@ -15,6 +15,10 @@ const fields = {
         input: document.querySelector('#gender'),
         error: document.querySelector('#genderError'),
     },
+    dateOfBirth: {
+        input: document.querySelector('#dateOfBirth'),
+        error: document.querySelector('#dateOfBirthError'),
+    },
     password: {
         input: document.querySelector('#password'),
         error: document.querySelector('#passwordError'),
@@ -37,6 +41,19 @@ function clearFieldError(field) {
 
 function isValidEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function getAge(dateValue) {
+    const birthDate = new Date(dateValue);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        age -= 1;
+    }
+
+    return age;
 }
 
 function hasVisibleErrors() {
@@ -68,6 +85,7 @@ registerForm.addEventListener('submit', (event) => {
     const fullName = fields.fullName.input.value.trim();
     const email = fields.email.input.value.trim();
     const gender = fields.gender.input.value;
+    const dateOfBirth = fields.dateOfBirth.input.value;
     const password = fields.password.input.value.trim();
     const passwordConfirm = fields.passwordConfirm.input.value.trim();
 
@@ -90,6 +108,18 @@ registerForm.addEventListener('submit', (event) => {
     if (!gender) {
         setFieldError(fields.gender, 'Veuillez choisir votre genre.');
         hasError = true;
+    }
+
+    if (!dateOfBirth) {
+        setFieldError(fields.dateOfBirth, 'Veuillez saisir votre date de naissance.');
+        hasError = true;
+    } else {
+        const age = getAge(dateOfBirth);
+
+        if (Number.isNaN(age) || age < 10 || age > 100) {
+            setFieldError(fields.dateOfBirth, 'Veuillez saisir une date de naissance valide.');
+            hasError = true;
+        }
     }
 
     if (!password) {

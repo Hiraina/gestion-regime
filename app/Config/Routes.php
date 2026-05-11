@@ -18,3 +18,12 @@ $routes->post('profile/complete', 'Front\ProfileController::saveCompletion');
 $routes->get('dashboard', static function () {
     return 'Dashboard utilisateur a creer plus tard.';
 });
+
+$routes->group('admin', static function ($routes) {
+    $routes->get('diets', 'Admin\DietsController::index');
+    $routes->get('diets/create', 'Admin\DietsController::create');
+    $routes->post('diets', 'Admin\DietsController::store');
+    $routes->get('diets/(:num)/edit', 'Admin\DietsController::edit/$1');
+    $routes->post('diets/(:num)', 'Admin\DietsController::update/$1');
+    $routes->post('diets/(:num)/delete', 'Admin\DietsController::delete/$1');
+});
