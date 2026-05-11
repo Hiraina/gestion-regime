@@ -287,7 +287,7 @@ class RecommendationService
             'activity_durations_hours' => $activityDurationsHours,
         ];
     }
-    
+
     public function createRecommendation(int $userId, array $draft): array
     {
         $db = \Config\Database::connect();
@@ -591,72 +591,128 @@ class RecommendationService
         }
     }
 
-    public function generateDietCompositionForCandidate(int $userId, array $draft, array $candidate): array
-    {
-        $measurement = $this->bodyMeasurementsModel->getLatestByUserId($userId);
-        if (empty($measurement)) {
-            throw new \RuntimeException('Aucune mesure corporelle trouvée pour cet utilisateur.');
+
+public function generateDietCompositionForCandidate(int $userId, array $draft, array $candidate): array
+{
+    $measurement = $this->bodyMeasurementsModel->getLatestByUserId($userId);
+
+    if (empty($measurement)) {
+        throw new \RuntimeException('Aucune mesure corporelle trouvée pour cet utilisateur.');
+    }
+
+    $foodItemsById = [];
+
+    foreach (
+        $this->foodItemsModel->getByIds(
+            $this->extractUniqueFoodItemIds($draft)
+        ) as $item
+    ) {
+        $foodItemsById[(int) $item['id']] = $item;
+    }
+
+    $targetCalories = (float) ($candidate['metrics']['daily_intake'] ?? 0.0);
+
+    if ($targetCalories < 1200) {
+        $targetCalories = 1200;
+    }
+
+    $goalType = (string) ($candidate['goal_type'] ?? 'candidate');
+    $profile = (string) ($candidate['profile'] ?? 'balanced');
+    $targetNet = (float) ($candidate['target_net'] ?? 0.0);
+
+    $dietName = sprintf(
+        'Plan %s - %s',
+        ucfirst($profile),
+        ucfirst(str_replace('_', ' ', $goalType))
+    );
+
+    $dietDescription = sprintf(
+        'Plan journalier généré pour %s avec un apport cible de %.0f kcal et des quantités à consommer sur une journée entière.',
+        $goalType,
+        $targetCalories
+    );
+
+    $dietId = $this->dietsModel->insert([
+        'name' => $dietName,
+        'description' => $dietDescription,
+    ], true);
+
+    if (!$dietId) {
+        throw new \RuntimeException('Impossible de créer le plan alimentaire.');
+    }
+
+    $composition = $this->buildDietCompositionPreview(
+        $draft,
+        $targetCalories,
+        $goalType
+    );
+
+    $totalWeight = 0.0;
+
+    foreach ($composition as $section) {
+        foreach ($section['items'] as $itemRow) {
+            $totalWeight += (float) $itemRow['quantity_grams'];
         }
+    }
 
-        $foodItemsById = [];
-        foreach ($this->foodItemsModel->getByIds($this->extractUniqueFoodItemIds($draft)) as $item) {
-            $foodItemsById[(int) $item['id']] = $item;
-        }
+    $minimumDailyWeight = 1500.0;
 
-        $targetCalories = (float) ($candidate['metrics']['total_gain'] ?? 0.0);
-        if ($targetCalories <= 0) {
-            throw new \RuntimeException('Impossible de déterminer l\'apport calorique cible du plan.');
-        }
+    if ($totalWeight > 0 && $totalWeight < $minimumDailyWeight) {
 
-        $goalType = (string) ($candidate['goal_type'] ?? 'candidate');
-        $profile = (string) ($candidate['profile'] ?? 'balanced');
-        $targetNet = (float) ($candidate['target_net'] ?? 0.0);
+        $scaleFactor = $minimumDailyWeight / $totalWeight;
 
-        $dietName = sprintf('Plan %s - %s', ucfirst($profile), ucfirst(str_replace('_', ' ', $goalType)));
-        $dietDescription = sprintf(
-            'Plan journalier généré pour %s avec un apport cible de %.0f kcal et des quantités à consommer sur une journée entière.',
-            $goalType,
-            $targetCalories,
-            $targetNet
-        );
+        foreach ($composition as &$section) {
 
-        $dietId = $this->dietsModel->insert([
-            'name' => $dietName,
-            'description' => $dietDescription,
-        ], true);
+            foreach ($section['items'] as &$itemRow) {
 
-        if (!$dietId) {
-            throw new \RuntimeException('Impossible de créer le plan alimentaire.');
-        }
+                $newQuantity = round(
+                    $itemRow['quantity_grams'] * $scaleFactor,
+                    2
+                );
 
-        $composition = $this->buildDietCompositionPreview($draft, $targetCalories, $goalType);
+                if ($newQuantity < 50) {
+                    $newQuantity = 50;
+                }
 
-        foreach ($draft['distributions'] as $categoryId => $percentage) {
-            $this->foodDistributionsModel->insert([
-                'diet_id' => $dietId,
-                'category_id' => (int) $categoryId,
-                'percentage' => (float) $percentage,
-            ]);
-        }
-
-        foreach ($composition as $section) {
-            foreach ($section['items'] as $itemRow) {
-                $this->dietCompositionsModel->insert([
-                    'diet_id' => $dietId,
-                    'food_item_id' => (int) $itemRow['food_item_id'],
-                    'quantity' => (float) $itemRow['quantity_grams'],
-                ]);
+                $itemRow['quantity_grams'] = $newQuantity;
             }
         }
 
-        return [
-            'diet_id' => (int) $dietId,
-            'diet_name' => $dietName,
-            'diet_description' => $dietDescription,
-            'target_calories' => $targetCalories,
-            'composition' => $composition,
-        ];
+        unset($section, $itemRow);
     }
+
+    foreach ($draft['distributions'] as $categoryId => $percentage) {
+
+        $this->foodDistributionsModel->insert([
+            'diet_id' => $dietId,
+            'category_id' => (int) $categoryId,
+            'percentage' => (float) $percentage,
+        ]);
+    }
+
+    foreach ($composition as $section) {
+
+        foreach ($section['items'] as $itemRow) {
+
+            $this->dietCompositionsModel->insert([
+                'diet_id' => $dietId,
+                'food_item_id' => (int) $itemRow['food_item_id'],
+                'quantity' => (float) $itemRow['quantity_grams'],
+            ]);
+        }
+    }
+
+    return [
+        'diet_id' => (int) $dietId,
+        'diet_name' => $dietName,
+        'diet_description' => $dietDescription,
+        'target_calories' => $targetCalories,
+        'total_weight_grams' => round($totalWeight, 2),
+        'composition' => $composition,
+    ];
+}
+
+
 
     private function extractProfileFromStatus(string $status): string
     {
@@ -734,48 +790,80 @@ class RecommendationService
         return $grouped;
     }
 
-    private function allocateCategoryCalories(array $itemIds, array $foodItemsById, float $categoryBudget, string $goalDirection): array
-    {
-        $items = [];
-        foreach ($itemIds as $itemId) {
-            $item = $foodItemsById[$itemId] ?? null;
-            if (!$item) {
-                continue;
-            }
+private function allocateCategoryCalories(
+    array $itemIds,
+    array $foodItemsById,
+    float $categoryBudget,
+    string $goalDirection
+): array
+{
+    $items = [];
 
-            $calories = max(1.0, (float) ($item['calories_per_100g'] ?? 0.0));
-            $weight = 1.0;
+    foreach ($itemIds as $itemId) {
 
-            if ($goalDirection === 'weight_loss') {
-                $weight = 1.0 / $calories;
-            } elseif ($goalDirection === 'weight_gain') {
-                $weight = $calories;
-            }
+        $item = $foodItemsById[$itemId] ?? null;
 
-            $items[] = [
-                'id' => $itemId,
-                'weight' => $weight,
-                'calories' => $calories,
-            ];
+        if (!$item) {
+            continue;
         }
 
-        if (empty($items)) {
-            return [];
+        $calories = max(
+            1.0,
+            (float) ($item['calories_per_100g'] ?? 0.0)
+        );
+
+        $weight = 1.0;
+
+        if ($goalDirection === 'weight_loss') {
+
+            $weight = max(0.5, 300.0 / $calories);
+
+        } elseif ($goalDirection === 'weight_gain') {
+
+            $weight = max(1.0, $calories / 100.0);
         }
 
-        $weightSum = array_sum(array_column($items, 'weight'));
-        if ($weightSum <= 0) {
-            $weightSum = count($items);
-        }
-
-        $allocated = [];
-        foreach ($items as $item) {
-            $share = $item['weight'] / $weightSum;
-            $allocated[$item['id']] = round($categoryBudget * $share, 2);
-        }
-
-        return $allocated;
+        $items[] = [
+            'id' => $itemId,
+            'weight' => $weight,
+            'calories' => $calories,
+        ];
     }
+
+    if (empty($items)) {
+        return [];
+    }
+
+    $weightSum = array_sum(array_column($items, 'weight'));
+
+    if ($weightSum <= 0) {
+        $weightSum = count($items);
+    }
+
+    $allocated = [];
+
+    foreach ($items as $item) {
+
+        $share = $item['weight'] / $weightSum;
+
+        $allocatedCalories = round(
+            $categoryBudget * $share,
+            2
+        );
+
+        /*
+         * Prevent absurdly tiny allocations.
+         */
+        if ($allocatedCalories < 100) {
+            $allocatedCalories = 100;
+        }
+
+        $allocated[$item['id']] = $allocatedCalories;
+    }
+
+    return $allocated;
+}
+
 
     private function getFoodCategoryName(int $categoryId): string
     {
