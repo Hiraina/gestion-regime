@@ -50,6 +50,28 @@ public function save()
         return $this->respondWithMessage(false, 'Objectif invalide');
     }
 
+    // Les cartes du dashboard utilisent une logique métier (gain / perte / IMC)
+    // qui ne correspond pas forcément aux IDs bruts en base.
+    $goalNameMap = [
+        1 => 'Prise de poids',
+        2 => 'Perte de poids',
+        3 => 'IMC idéal',
+    ];
+
+    if (isset($goalNameMap[(int) $goalId])) {
+        $goal = $db->table('goals')
+            ->where('name', $goalNameMap[(int) $goalId])
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getRow();
+
+        if (!$goal) {
+            return $this->respondWithMessage(false, 'Objectif métier introuvable en base.');
+        }
+
+        $goalId = $goal->id;
+    }
+
     $data = [
         'user_id'    => $userId,
         'goal_id'    => $goalId,
@@ -59,7 +81,7 @@ public function save()
     ];
 
     // Objectifs nécessitant une fourchette de poids
-    if (in_array($goalId, [1, 2])) {
+    if (in_array((int) $goal->id, [1, 2], true) || in_array($goal->name, ['Prise de poids', 'Perte de poids'], true)) {
         if ($minKg === null || $maxKg === null || $minKg === '' || $maxKg === '') {
             return $this->respondWithMessage(false, 'Veuillez saisir le poids minimum et maximum');
         }

@@ -8,6 +8,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 $routes->get('/test','TestController::index');
+$routes->get('/test/create_recommendation', 'TestController::createRecommendation');
 
 $routes->group('health', function($routes){
     $routes->get('metrics','Front\HealthController::getMetrics');
@@ -20,25 +21,45 @@ $routes->group('wallet', function($routes){
     $routes->get('transactions', 'Front\WalletController::getTransactions');
 });
 
-$routes->get('/register/step1', 'RegisterController::step1');
-$routes->post('/register/step1', 'RegisterController::postStep1');
+$routes->group('register', function($routes){
+    $routes->get('step1', 'RegisterController::step1');
+    $routes->post('step1', 'RegisterController::postStep1');
 
-$routes->get('/register/step2', 'RegisterController::step2');
-$routes->post('/register/step2', 'RegisterController::postStep2');
+    $routes->get('step2', 'RegisterController::step2');
+    $routes->post('step2', 'RegisterController::postStep2');
+});
+
 
 $routes->get('/login', 'AuthController::login');
 $routes->post('/login', 'AuthController::attemptLogin');
 $routes->get('/logout', 'AuthController::logout');
 
-$routes->get('/profile/complete', 'ProfileController::complete');
-$routes->post('/profile/complete', 'ProfileController::save');
-
-$routes->get('/profile', 'ProfileController::index');
-
+$routes->group('profile', function($routes){
+    $routes->get('/', 'ProfileController::index');
+    $routes->get('complete', 'ProfileController::complete');
+    $routes->post('complete', 'ProfileController::save');
+});
 
 $routes->post('codes/redeem', 'CodesController::redeem');
 
-$routes->get('/goals', 'GoalController::index');
-$routes->post('/goals/save', 'GoalController::save');
+$routes->group('goals', function($routes){
+    $routes->get('/', 'GoalController::index');
+    $routes->post('save', 'GoalController::save');
+});
+
+$routes->group('recommendations', function($routes){
+    $routes->get('/', 'Front\RecommendationController::index');
+    $routes->get('step1', 'Front\RecommendationController::step1');
+    $routes->post('step1', 'Front\RecommendationController::saveStep1');
+    $routes->get('step2', 'Front\RecommendationController::step2');
+    $routes->post('step2', 'Front\RecommendationController::saveStep2');
+    $routes->get('step3', 'Front\RecommendationController::step3');
+    $routes->post('step3', 'Front\RecommendationController::saveStep3');
+    $routes->get('step4', 'Front\RecommendationController::step4');
+    $routes->post('submit', 'Front\RecommendationController::submit');
+    $routes->get('candidates', 'Front\RecommendationController::candidates');
+    $routes->post('choose/(:num)', 'Front\RecommendationController::chooseCandidate/$1');
+    $routes->get('clear', 'Front\RecommendationController::clear');
+});
 
 $routes->get('/dashboard', 'Dashboard::index');

@@ -90,7 +90,7 @@
                 <strong><?= esc($current_goal->goal_name) ?></strong>
                 <?php if ($current_goal->min_kg && $current_goal->max_kg): ?>
                     <span class="weight-range">
-                        Poids cible : <?= esc($current_goal->min_kg) ?> – <?= esc($current_goal->max_kg) ?> kg
+                        Variation de poids souhaitée : <?= esc($current_goal->min_kg) ?> – <?= esc($current_goal->max_kg) ?> kg
                     </span>
                 <?php endif; ?>
                 <span class="goal-date">Depuis le <?= esc(date('d/m/Y', strtotime($current_goal->start_date))) ?></span>
@@ -140,12 +140,12 @@
                     <p>Prenez du volume et développez votre masse musculaire.</p>
                     <div class="goal-card-extra" style="display:none;">
                         <div class="input-group">
-                            <label>Poids minimum (kg)</label>
-                            <input type="number" step="0.1" name="min_kg" placeholder="Ex: 70">
+                            <label>Variation minimale souhaitée (kg)</label>
+                            <input type="number" step="0.1" name="min_kg" placeholder="Ex: 2">
                         </div>
                         <div class="input-group">
-                            <label>Poids maximum (kg)</label>
-                            <input type="number" step="0.1" name="max_kg" placeholder="Ex: 75">
+                            <label>Variation maximale souhaitée (kg)</label>
+                            <input type="number" step="0.1" name="max_kg" placeholder="Ex: 6">
                         </div>
                         <button class="btn btn-primary btn-validate">Valider</button>
                     </div>
@@ -160,12 +160,12 @@
                     <p>Perdez de la masse grasse et affinez votre silhouette.</p>
                     <div class="goal-card-extra" style="display:none;">
                         <div class="input-group">
-                            <label>Poids minimum (kg)</label>
-                            <input type="number" step="0.1" name="min_kg" placeholder="Ex: 60">
+                            <label>Variation minimale souhaitée (kg)</label>
+                            <input type="number" step="0.1" name="min_kg" placeholder="Ex: 2">
                         </div>
                         <div class="input-group">
-                            <label>Poids maximum (kg)</label>
-                            <input type="number" step="0.1" name="max_kg" placeholder="Ex: 65">
+                            <label>Variation maximale souhaitée (kg)</label>
+                            <input type="number" step="0.1" name="max_kg" placeholder="Ex: 6">
                         </div>
                         <button class="btn btn-primary btn-validate">Valider</button>
                     </div>
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const maxKg = card.querySelector('[name="max_kg"]')?.value || null;
 
             if ((goalId == 1 || goalId == 2) && (!minKg || !maxKg)) {
-                showMessage('Veuillez remplir les deux champs de poids.', 'error');
+                showMessage('Veuillez remplir les deux champs de variation de poids souhaitée.', 'error');
                 return;
             }
 
@@ -365,7 +365,7 @@ function updateCurrentGoalUI(goal) {
                 <div class="current-goal-body">
                     <strong>${goal.goal_name}</strong>
                     ${goal.min_kg && goal.max_kg ? 
-                        `<span class="weight-range">Poids cible : ${goal.min_kg} – ${goal.max_kg} kg</span>` : ''}
+                        `<span class="weight-range">Variation de poids souhaitée : ${goal.min_kg} – ${goal.max_kg} kg</span>` : ''}
                     <span class="goal-date">Depuis le ${new Date(goal.start_date).toLocaleDateString('fr-FR')}</span>
                 </div>
             </div>

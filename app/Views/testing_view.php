@@ -19,7 +19,25 @@
     </ul>
 
     <hr>
-    
+    <h1>Recommendations</h1>
+    <button id="create-rec-btn">Create sample recommendation</button>
+    <pre id="rec-result" style="background:#f4f4f4;padding:12px;border-radius:8px;margin-top:10px;display:none;"></pre>
+    <hr>
+    <script>
+        document.getElementById('create-rec-btn').addEventListener('click', async () => {
+            const resEl = document.getElementById('rec-result');
+            resEl.style.display = 'block';
+            resEl.textContent = 'Running...';
+
+            try {
+                const resp = await fetch('/test/create_recommendation');
+                const data = await resp.json();
+                resEl.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resEl.textContent = 'Error: ' + err.message;
+            }
+        });
+    </script>
     <h3>Credit</h3>
     <form action="/wallet/credit" method="post">
         <?= csrf_field() ?>
