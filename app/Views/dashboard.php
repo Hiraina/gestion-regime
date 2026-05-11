@@ -32,6 +32,9 @@
             <a href="<?= base_url('statistics') ?>">
                 <i class="fas fa-chart-bar"></i> Statistiques
             </a>
+            <a href="<?= base_url('gold') ?>">
+                <i class="fas fa-crown"></i> Passer Gold
+            </a>
         </nav>
         <div class="sidebar-footer">
             <a href="<?= base_url('logout') ?>" class="logout-btn">
@@ -54,9 +57,9 @@
                     <i class="fas fa-wallet"></i>
                     <span class="balance-amount"><?= esc($balance ?? '0.00') ?> €</span>
                 </div>
-                <button class="btn-icon" id="open-code-modal" title="Entrer un code">
+                <a class="btn-icon" href="<?= base_url('gold') ?>" title="Entrer un code">
                     <i class="fas fa-ticket-alt"></i> Code
-                </button>
+                </a>
             </div>
         </div>
 

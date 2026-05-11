@@ -39,6 +39,18 @@ $routes->group('profile', function($routes){
 
 $routes->post('codes/redeem', 'CodesController::redeem');
 
+$routes->group('gold', function($routes){
+    $routes->get('/', 'Front\GoldController::index');
+    $routes->get('status', 'Front\GoldController::status');
+    $routes->post('purchase', 'Front\GoldController::purchase');
+    $routes->post('activate', 'Front\GoldController::activate');
+    $routes->post('deactivate', 'Front\GoldController::deactivate');
+});
+
+$routes->group('diets', function($routes){
+    $routes->post('purchase', 'Front\DietPurchaseController::purchase');
+});
+
 $routes->group('goals', function($routes){
     $routes->get('/', 'GoalController::index');
     $routes->post('save', 'GoalController::save');

@@ -850,10 +850,7 @@ private function allocateCategoryCalories(
             $categoryBudget * $share,
             2
         );
-
-        /*
-         * Prevent absurdly tiny allocations.
-         */
+        
         if ($allocatedCalories < 100) {
             $allocatedCalories = 100;
         }

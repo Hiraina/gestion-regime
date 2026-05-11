@@ -38,3 +38,8 @@ INSERT INTO activities(name, description, met_value) VALUES
 ('Cyclisme', 'Vélo ou cyclisme indoor', 8.0),
 ('Natation', 'Nage libre ou crawl', 7.0),
 ('Yoga', 'Séance de yoga relaxante', 2.5);
+
+INSERT INTO codes(code_value, amount) VALUES
+('abcd', 1500),
+('efgh', 75),
+('1234', 10000);
