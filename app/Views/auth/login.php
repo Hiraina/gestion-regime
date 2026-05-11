@@ -80,3 +80,43 @@
     <script src="<?= base_url('assets/js/auth/login.js') ?>"></script>
 </body>
 </html>
+        </div>
+
+        <div class="auth-title">
+            <h2>Connexion</h2>
+            <span>Accédez à votre espace santé</span>
+        </div>
+
+        <?php if (session()->getFlashdata('error')) : ?>
+            <div class="error-message">
+                <?= session()->getFlashdata('error') ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="post" action="/login">
+
+            <?= csrf_field() ?>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input class="form-control" type="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input class="form-control" type="password" name="password" required>
+            </div>
+
+            <button class="btn" type="submit">
+                Se connecter
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>
+>>>>>>> a7a2f66c47bcc0f6dd053a94ebb859d5db647e31

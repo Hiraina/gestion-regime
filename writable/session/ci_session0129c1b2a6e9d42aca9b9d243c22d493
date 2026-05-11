@@ -1,0 +1,1 @@
+__ci_last_regenerate|i:1778249019;register_user|a:5:{s:4:"name";s:4:"John";s:5:"email";s:13:"john@test.com";s:8:"password";s:60:"$2y$10$HA2G2KMV5mGf/.JynEZQZuk.HZq7uMz3hJQMP16wCLfosAUQYarF6";s:9:"gender_id";s:1:"1";s:7:"is_gold";i:0;}_ci_previous_url|s:46:"http://localhost:8080/index.php/register/step2";

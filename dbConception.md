@@ -11,7 +11,6 @@ Le système suit la progression des utilisateurs, gère les transactions financi
 Certaines parties du système sont automatisées (recommandations, suivi, etc.), tandis que d’autres dépendent des informations fournies par les utilisateurs (mesures corporelles, objectifs, etc.).
 
 ## Tables
-
 ### Gender
 | Field | Type | Description |
 |------|------|------------|
@@ -19,17 +18,18 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |name  | VARCHAR (50) | e.g. Homme / Femme |
 
 
-### User
+### Users
 | Field | Type | Description |
-|------|------|------------|
+|------|------|--------------|
 |id    | INT  |  Primary Key |
 |name  | VARCHAR (50) |
 |email | VARCHAR (255) | unique|
 |password | VARCHAR (255)|
-|gender_id | INT | |
+|birth_date| DATE ||
+|gender_id | INT | Foreign Key|
 |is_gold| TINYINT(1) | 0 (False) / 1 (True)|
 
-### Wallet
+### Wallets
 | Field | Type | Description |
 |-------|------|-------------|
 |id     |  INT | Primary Key |
@@ -37,14 +37,14 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |balance| DECIMAL (19, 4) |  |
 
 
-### TransactionType
+### Transaction_types
 | Field | Type | Description |
 |-------|------|-------------|
 |id     |  INT | Primary Key |
 |name|  VARCHAR(50) | (credit, debit, ...) |
 
 
-### Transaction
+### Transactions
 | Field | Type | Description |
 |-------|------|-------------|
 |id     | INT  | PRIMARY KEY |
@@ -54,107 +54,114 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |created_at| DATETIME ||
 
 
-### Code
+### Codes
 | Field | Type | Description |
 |-------|------|-------------|
 |id     | INT  | PRIMARY KEY |
 |code_value| VARCHAR(50) | e.g "A25SX71D" |
-|amount| DECIMAL(19,4) | somme obtenue en rentrant le code|
-|is_used| TINYINT(1) | 0 / 1 |
+|amount| DECIMAL(19,4) | somme obtenue en rentrant le Codes|
+|used_by_user_id| INT | FK |
+|date_of_use| DATETIME ||
 
-### BodyMeasurement
+### Body_measurements
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |user_id | INT | FOREIGN KEY |
-|height | DECIMAL (5, 2) | utiliser pour le calcul IMC |
-|weight | DECIMAL (6, 2) | utiliser pour le calcul IMC |
+|height | DECIMAL (5, 2) | en cm, utiliser pour le calcul IMC et BMR|
+|weight | DECIMAL (6, 2) | en kg, utiliser pour le calcul IMC et BMR|
 |created_at| DATE | utiliser pour suivre les progès |
 
-### Goal
+### Goals
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|name| VARCHAR(128) | prise de poids, perte de poids, atteindre son IMC ideal |
+|name| VARCHAR(120) | prise de poids, perte de poids, atteindre son IMC ideal |
 |description | TEXT ||
 
-### UserGoal
+### User_goals
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |user_id | INT |  FOREIGN KEY |
 |goal_id | INT | FOREIGN KEY |
+|min_kg| DECIMAL(6,2)||
+|max_kg| DECIMAL(6,2)||
 |start_date| DATE | |
 
-### PlanTemplate
+### Diets
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
-|goal_id | INT | FOREIGN KEY |
-|imc_min| DECIMAL(5,2) ||
-|imc_max| DECIMAL(5,2) ||
-|duration| INT | Durée en jour |
-
-### Diet
-| Field | Type | Description |
-|-------|------|-------------|
-|id | INT | PRIMARY KEY |
-|name | VARCHAR(50) | e.g Diet A|
+|name | VARCHAR(50) | e.g Diets A|
 |description | TEXT ||
 
-### DietDurationPricing
+### Diet_duration_pricing
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |diet_id | INT | FK |
-|duration_days| INT ||
-|price | DECIMAL (19, 4)||
+|price_per_day | DECIMAL (19, 4)||
 
-### FoodCategory
+### Food_categories
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |name| VARCHAR(50) | e.g viande, poisson, volaille |
 
-### DietComposition
+### Food_items
 | Field | Type | Description |
 |-------|------|-------------|
-|diet_id | INT | PRIMARY KEY / FK | 
-|category_id| INT | PRIMARY KEY / FK|
-|percentage| DECIMAL (5, 4)| de 0.0000 à 1.0000|
+|id| INT| PRIMARY KEY|
+|category_id| INT | FK|
+|name| VARCHAR(50)| e.g. cuisse de poulet, saumon|
+|calories_per_100g| DECIMAL(19,4) | en Kcal|
 
-### Activity
+### Food_distributions
+| Field | Type | Description |
+|-------|------|-------------|
+|diet_id | INT | PRIMARY KEY / FK |
+|category_id | INT | PRIMARY KEY / FK |
+|percentage | DECIMAL (5, 2) | % of diet from this category |
+
+### Diet_compositions
+| Field | Type | Description |
+|-------|------|-------------|
+|id | INT | PRIMARY KEY |
+|recommendation_id | INT | FK |
+|diet_id | INT | FK | 
+|food_item_id| INT| FK |
+|quantity| DECIMAL (19, 4)| en gramme |
+
+### Activities
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |name | VARCHAR (50) | |
 |description | TEXT ||
+|met_value| DECIMAL(6,2) | utiliser pour le calcule des calories brulées|
 
-### TemplateDiet
-| Field | Type | Description |
-|-------|------|-------------|
-|template_id | INT | PRIMARY KEY / FK |
-|diet_id| INT | PRIMARY KEY / FK |
-
-### TemplateActivity
-| Field | Type | Description |
-|-------|------|-------------|
-|template_id | INT | PRIMARY KEY / FK |
-|activity_id | INT | PRIMARY KEY / FK |
-
-### Recommendation
+### Recommendations
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |user_id | INT | FK |
-|template_id | INT | FK |
+|diet_id | INT | FK |
 |generated_at | DATETIME | date de génération |
 |start_date | DATE | |
 |end_date | DATE | |
 |status | VARCHAR(20) | active, rejected, completed |
 |trigger_measurement_id | INT | FK (BodyMeasurement_id) |
 
-### UserDietPurchase
+### Recommendation_activities
+| Field | Type | Description |
+|-------|------|-------------|
+|recommendation_id | INT | PRIMARY KEY / FK |
+|activity_id | INT | PRIMARY KEY / FK |
+|frequency_per_week| INT | |
+|duration_minutes| INT | |
+
+### User_diet_purchases
 | Field | Type | Description |
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
@@ -164,30 +171,106 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |price_paid| DECIMAL (19, 4)| prix après remise |
 |discount_applied| DECIMAL (19, 4)| remise |
 
+### User_profiles
+| Field | Type | Description |
+|-------|------|-------------|
+|id | INT | PRIMARY KEY |
+|user_id | INT | FK |
+|age | INT | |
+|num_telephone | VARCHAR(20) | |
+|adresse | TEXT | |
+|created_at | TIMESTAMP | |
 
-## Relation
-- Un `User` dispose d'un `Wallet`.
-- Un `Wallet` appartient à un `User`.
-- Un `User` peut avoir de nombreuses `Transaction` (via `Wallet`).
-- Un `User` peut avoir de nombreuses `BodyMeasurement`.
-- Un `User` peut avoir de nombreux `Goal` via `UserGoal`.
-- Un `User` peut avoir de nombreuses `Recommendation`.
-- Un `User` peut effectuer de `UserDietPurchase`.
 
-- Un `Wallet` contient plusieurs `Transaction`.
-- Une `Transaction` appartient à un `Wallet`.
-- Une `Transaction` a un `TransactionType`.
+## Relations
+- Un `Users` dispose d'un `Wallets`.
+- Un `Wallets` appartient à un `Users`.
+- Un `Users` peut avoir de nombreuses `Transactions` (via `Wallets`).
+- Un `Users` peut avoir de nombreuses `Body_measurements`.
+- Un `Users` peut avoir de nombreux `Goals` via `User_goals`.
+- Un `Users` peut avoir de nombreuses `Recommendations`.
+- Un `Users` peut effectuer de `User_diet_purchases`.
+- Un `Users` peut avoir un `User_profiles`.
 
-- Un `User` peut avoir plusieurs `Goal`.
-- Un `Goal` peut être attribué à plusieurs `User` via `UserGoal`.
-- `UserGoal` relie un `User` à un `Goal`.
+- Un `Wallets` contient plusieurs `Transactions`.
+- Une `Transactions` appartient à un `Wallets`.
+- Une `Transactions` a un `Transaction_types`.
 
-- Un `PlanTemplate` est associé à un `Goal`.
-- Un `Goal` peut avoir plusieurs `PlanTemplate`.
+- Un `Users` peut avoir plusieurs `Goals`.
+- Un `Goals` peut être attribué à plusieurs `Users` via `User_goals`.
+- `User_goals` relie un `Users` à un `Goals`.
 
-- Un `Diet` peut avoir plusieurs `DietDurationPricing`.
-- Un `Diet` appartient à plusieurs `FoodCategory` via `DietComposition`.
-- Un `FoodCategory` peut appartenir à plusieurs `Diet` via `DietComposition`.
 
-# Note
- finir d'établir la relation entre les differentes tables
+- Un `Diets` peut avoir plusieurs `Diet_duration_pricing`.
+- Un `Food_items` appartient a un `Food_categories`.
+- Un `Food_categories` peut avoir plusieurs `Food_items`.
+- Un `Diets` peut avoir plusieurs `Food_distributions` par catégories.
+- Un `Food_categories` peut avoir plusieurs `Food_distributions`.
+- Un `Diets` peut contenir plusieurs `Food_items` via `Diet_compositions`.
+- Un `Recommendations` peut contenir plusieurs `Diet_compositions`.
+- Un `Food_items` peut appartenir a plusieurs `Diets` via `Diet_compositions`.
+
+- Un `Recommendations` appartient à un `Users`.
+- Un `Recommendations` est générée à partir d'un seul `Diets`.
+- Un `Recommendations` peut inclure plusieurs `Activities` via `Recommendation_activities`.
+- Un `Activities` peut appartenir à plusieurs `Recommendations` via `Recommendation_activities`.
+
+- Un `Users` peut acheter plusieurs `Diets`.
+- Un `Diets` peut être acheter par plusieurs `Users`.
+- `User_diet_purchases` relie `Users` et `Diets` avec les détails de l'achats.
+- Un `Codes` peut etre utilise par un `Users`.
+
+## Règles à suivre
+
+- L'email d'un `Users` doit être unique.
+- Un `Users` ne peut posséder qu'un seul `Wallets`.
+- Le genre d'un `Users` doit référencer une entrée valide dans `Gender`.
+
+- Le solde d'un `Wallets` ne peut pas être négatif.
+- Le montant d'une `Transactions` doit être supérieur à 0.
+- Un `Codes` ne peut être utilisé qu'une seule fois.
+
+- La taille et le poids doivent être supérieurs à 0.
+- Les `Body_measurements` sont utilisées pour calculer l'IMC utilisateur.
+
+- Chaque objectif doit référencer un `Goals` valide.
+
+- Une `Recommendations` doit être générée à partir d'une `Body_measurements` valide.
+- La date de fin d'une `Recommendations` doit être postérieure à la date de début.
+
+- Le pourcentage total des `Food_distributions` pour un `Diets` doit être égal à 100.
+- Le prix d'un `Diet_duration_pricing` doit être positif.
+
+## Origine des données
+
+### Données utilisateur
+
+Les données suivantes sont fournies ou modifiées directement par les utilisateurs :
+- `Users`
+- `Body_measurements`
+- `User_goals`
+- `User_diet_purchases`
+- `Food_distributions`
+- `User_profiles`
+
+### Données administrateur / configuration
+
+Les données suivantes sont gérées par les administrateurs afin de configurer le système :
+- `Gender`
+- `Transaction_types`
+- `Goals`
+- `Food_categories`
+- `Food_items`
+- `Diets`
+- `Diet_duration_pricing`
+- `Activities`
+- `Codes`
+
+### Données générées automatiquement
+
+Certaines données sont générées ou mises à jour automatiquement par le système :
+- `Recommendations`
+- `Transactions`
+- `Diet_compositions`
+- le solde et la création du `Wallets`
+- le statut des `Recommendations`

@@ -106,3 +106,27 @@ Stack trace:
 #12 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/system/Boot.php(166): CodeIgniter\Boot::runCommand()
 #13 /home/hiraina/Documents/Pages Web/L2/S4/gestion-regime/spark(87): CodeIgniter\Boot::bootSpark()
 #14 {main}
+=======
+INFO - 2026-05-09 11:44:38 --> CSRF token verified.
+DEBUG - 2026-05-09 11:44:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-05-09 11:44:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-05-09 11:44:49 --> CSRF token verified.
+DEBUG - 2026-05-09 11:44:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-05-09 11:44:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-05-09 11:45:02 --> CSRF token verified.
+DEBUG - 2026-05-09 11:45:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-05-09 11:45:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+WARNING - 2026-05-09 11:45:02 --> [DEPRECATED] date_create(): Passing null to parameter #1 ($datetime) of type string is deprecated in APPPATH/Services/HealthService.php on line 34.
+ 1 APPPATH/Services/HealthService.php(34): date_create(null)
+ 2 APPPATH/Controllers/Front/HealthController.php(46): App\Services\HealthService->calculateBMR([...], [...])
+ 3 APPPATH/Controllers/Dashboard.php(17): App\Controllers\Front\HealthController->getMetricsByUserId('2')
+ 4 SYSTEMPATH/CodeIgniter.php(951): App\Controllers\Dashboard->index()
+ 5 SYSTEMPATH/CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Dashboard))
+ 6 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+10 SYSTEMPATH/rewrite.php(44): require_once('/home/user/Projets/SI/regime/gestion-regime/public/index.php')
+DEBUG - 2026-05-09 11:45:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-05-09 11:45:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+>>>>>>> a7a2f66c47bcc0f6dd053a94ebb859d5db647e31
