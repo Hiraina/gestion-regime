@@ -28,7 +28,7 @@ class CodesController extends BaseController
 
         return $this->response->setJSON([
             'success' => true,
-            'message' => 'Code valide ! +' . number_format($result['amount'], 2) . ' EUR ajoutes.',
+            'message' => 'Code valide ! +' . number_format($result['amount'], 2) . ' Ar ajoutes.',
             'new_balance' => number_format($result['new_balance'], 2),
         ]);
     }

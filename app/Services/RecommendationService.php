@@ -10,8 +10,13 @@ use App\Models\FoodItemsModel;
 use App\Models\UsersModel;
 use App\Models\UserGoalsModel;
 use App\Models\DietsModel;
+use App\Models\DietDurationPricingModel;
 use App\Models\FoodDistributionsModel;
 use App\Models\DietCompositionsModel;
+use App\Models\WalletsModel;
+use App\Models\TransactionsModel;
+use App\Models\TransactionTypesModel;
+use App\Services\GoldService;
 
 class RecommendationService
 {
@@ -25,6 +30,11 @@ class RecommendationService
     private $dietsModel;
     private $foodDistributionsModel;
     private $dietCompositionsModel;
+    private $dietPricingModel;
+    private $walletModel;
+    private $transactionModel;
+    private $transactionTypeModel;
+    private $goldService;
     private $healthService;
 
     public function __construct()
@@ -39,6 +49,11 @@ class RecommendationService
         $this->dietsModel = new DietsModel();
         $this->foodDistributionsModel = new FoodDistributionsModel();
         $this->dietCompositionsModel = new DietCompositionsModel();
+        $this->dietPricingModel = new DietDurationPricingModel();
+        $this->walletModel = new WalletsModel();
+        $this->transactionModel = new TransactionsModel();
+        $this->transactionTypeModel = new TransactionTypesModel();
+        $this->goldService = new GoldService();
         $this->healthService = new HealthService();
     }
 
@@ -690,6 +705,14 @@ class RecommendationService
         try {
             $dietResult = $this->generateDietCompositionForCandidate($userId, $selectedRecommendationId, $draft, $selectedCandidate);
 
+            $pricePerDay = $this->resolveDietPricePerDay($selectedDietId);
+            if ($pricePerDay > 0) {
+                $daysToGoal = $this->resolveDaysToGoal($userId, $selectedCandidate);
+                $totalPrice = $pricePerDay * max(1, $daysToGoal);
+                $totalPrice = $this->applyGoldDiscount($userId, $totalPrice);
+                $this->debitWalletForPlan($userId, $totalPrice);
+            }
+
             foreach ($candidateIds as $candidateId) {
                 $status = $candidateId === $selectedRecommendationId ? 'selected' : 'discarded';
 
@@ -716,6 +739,89 @@ class RecommendationService
             $db->transRollback();
             throw $th;
         }
+    }
+
+    private function resolveDietPricePerDay(int $dietId): float
+    {
+        $row = $this->dietPricingModel->where('diet_id', $dietId)->first();
+        if (!is_array($row)) {
+            throw new \RuntimeException('Tarif du regime introuvable.');
+        }
+
+        if (array_key_exists('price_per_day', $row) && $row['price_per_day'] !== null) {
+            return (float) $row['price_per_day'];
+        }
+
+        if (array_key_exists('price', $row) && $row['price'] !== null) {
+            return (float) $row['price'];
+        }
+
+        throw new \RuntimeException('Tarif du regime introuvable.');
+    }
+
+    private function resolveDaysToGoal(int $userId, array $selectedCandidate): int
+    {
+        $latestMeasurement = $this->bodyMeasurementsModel->getLatestByUserId($userId);
+        $currentWeight = isset($latestMeasurement['weight']) ? (float) $latestMeasurement['weight'] : null;
+        $latestGoal = $this->userGoalsModel->getLatestWithGoalByUserId($userId);
+
+        $netGain = $selectedCandidate['metrics']['net_gain'] ?? null;
+        $projection = $this->estimateGoalProjection($latestGoal, $currentWeight, is_numeric($netGain) ? (float) $netGain : null);
+
+        return (int) max(1, $projection['days_to_goal'] ?? 1);
+    }
+
+    private function debitWalletForPlan(int $userId, float $amount): void
+    {
+        if ($amount <= 0) {
+            return;
+        }
+
+        $wallet = $this->walletModel->where('user_id', $userId)->first();
+        if (!$wallet) {
+            throw new \RuntimeException('Portefeuille introuvable.');
+        }
+
+        $balance = (float) ($wallet['balance'] ?? 0);
+        if ($balance < $amount) {
+            throw new \RuntimeException('Solde insuffisant pour payer ce plan.');
+        }
+
+        $newBalance = $balance - $amount;
+        $updated = $this->walletModel->update($wallet['id'], [
+            'balance' => $newBalance,
+        ]);
+
+        if (!$updated) {
+            throw new \RuntimeException('Mise a jour du portefeuille impossible.');
+        }
+
+        $typeRow = $this->transactionTypeModel->getTypeId('debit');
+        $typeId = is_array($typeRow) ? (int) ($typeRow['id'] ?? 0) : (int) $typeRow;
+        if ($typeId <= 0) {
+            throw new \RuntimeException('Type de transaction debit introuvable.');
+        }
+
+        $this->transactionModel->insert([
+            'wallet_id' => $wallet['id'],
+            'amount' => $amount,
+            'transaction_type_id' => $typeId,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    private function applyGoldDiscount(int $userId, float $amount): float
+    {
+        if ($amount <= 0) {
+            return $amount;
+        }
+
+        if ($this->goldService->isGold($userId)) {
+            $rate = $this->goldService->getDiscountRate();
+            return max(0.0, round($amount * (1 - $rate), 2));
+        }
+
+        return $amount;
     }
 
 

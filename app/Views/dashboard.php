@@ -55,7 +55,7 @@
             <div class="wallet-zone">
                 <div class="wallet-balance" id="wallet-display">
                     <i class="fas fa-wallet"></i>
-                    <span class="balance-amount"><?= esc($balance ?? '0.00') ?> €</span>
+                    <span class="balance-amount"><?= esc($balance ?? '0.00') ?> Ar</span>
                 </div>
                 <a class="btn-icon" href="<?= base_url('gold') ?>" title="Entrer un code">
                     <i class="fas fa-ticket-alt"></i> Code
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.success) {
-                balanceDisplay.textContent = `${data.new_balance} €`;
+                balanceDisplay.textContent = `${data.new_balance} Ar`;
                 messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}`;
                 messageDiv.className = 'message success';
                 codeInput.value = '';

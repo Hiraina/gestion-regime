@@ -101,8 +101,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |-------|------|-------------|
 |id | INT | PRIMARY KEY |
 |diet_id | INT | FK |
-|duration_days| INT ||
-|price | DECIMAL (19, 4)||
+|price_per_day | DECIMAL (19, 4)||
 
 ### Food_categories
 | Field | Type | Description |
@@ -128,8 +127,10 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 ### Diet_compositions
 | Field | Type | Description |
 |-------|------|-------------|
-|diet_id | INT | PRIMARY KEY / FK | 
-|food_item_id| INT| PRIMARY KEY / FK|
+|id | INT | PRIMARY KEY |
+|recommendation_id | INT | FK |
+|diet_id | INT | FK | 
+|food_item_id| INT| FK |
 |quantity| DECIMAL (19, 4)| en gramme |
 
 ### Activities
@@ -170,6 +171,16 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 |price_paid| DECIMAL (19, 4)| prix après remise |
 |discount_applied| DECIMAL (19, 4)| remise |
 
+### User_profiles
+| Field | Type | Description |
+|-------|------|-------------|
+|id | INT | PRIMARY KEY |
+|user_id | INT | FK |
+|age | INT | |
+|num_telephone | VARCHAR(20) | |
+|adresse | TEXT | |
+|created_at | TIMESTAMP | |
+
 
 ## Relations
 - Un `Users` dispose d'un `Wallets`.
@@ -179,6 +190,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `Users` peut avoir de nombreux `Goals` via `User_goals`.
 - Un `Users` peut avoir de nombreuses `Recommendations`.
 - Un `Users` peut effectuer de `User_diet_purchases`.
+- Un `Users` peut avoir un `User_profiles`.
 
 - Un `Wallets` contient plusieurs `Transactions`.
 - Une `Transactions` appartient à un `Wallets`.
@@ -195,6 +207,7 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - Un `Diets` peut avoir plusieurs `Food_distributions` par catégories.
 - Un `Food_categories` peut avoir plusieurs `Food_distributions`.
 - Un `Diets` peut contenir plusieurs `Food_items` via `Diet_compositions`.
+- Un `Recommendations` peut contenir plusieurs `Diet_compositions`.
 - Un `Food_items` peut appartenir a plusieurs `Diets` via `Diet_compositions`.
 
 - Un `Recommendations` appartient à un `Users`.
@@ -226,7 +239,6 @@ Certaines parties du système sont automatisées (recommandations, suivi, etc.),
 - La date de fin d'une `Recommendations` doit être postérieure à la date de début.
 
 - Le pourcentage total des `Food_distributions` pour un `Diets` doit être égal à 100.
-- La durée d'une offre de `Diet_duration_pricing` doit être supérieure à 0.
 - Le prix d'un `Diet_duration_pricing` doit être positif.
 
 ## Origine des données
@@ -239,6 +251,7 @@ Les données suivantes sont fournies ou modifiées directement par les utilisate
 - `User_goals`
 - `User_diet_purchases`
 - `Food_distributions`
+- `User_profiles`
 
 ### Données administrateur / configuration
 
@@ -251,9 +264,6 @@ Les données suivantes sont gérées par les administrateurs afin de configurer 
 - `Diets`
 - `Diet_duration_pricing`
 - `Activities`
-- `Plan_templates`
-- `Template_diets`
-- `Template_activities`
 - `Codes`
 
 ### Données générées automatiquement

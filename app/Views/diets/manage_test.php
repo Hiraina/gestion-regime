@@ -64,7 +64,7 @@
             <div class="profile-item" style="align-items:flex-start;">
                 <div>
                     <strong><?= esc($diet['name']) ?></strong><br>
-                    <small>Prix/jour: <?= esc(number_format($diet['price_per_day'], 2)) ?> EUR</small>
+                    <small>Prix/jour: <?= esc(number_format($diet['price_per_day'], 2)) ?> Ar</small>
                     <?php if (!empty($diet['categories'])): ?>
                         <div style="margin-top:6px; color:#475569;">
                             <?php foreach ($diet['categories'] as $index => $category): ?>

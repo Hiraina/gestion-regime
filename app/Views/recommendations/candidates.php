@@ -107,9 +107,25 @@
                         <?php if (isset($dietPricePerDay) && $dietPricePerDay !== null): ?>
                             <?php if ($candidate['estimated_days_to_goal'] !== null): ?>
                                 <?php $totalPrice = $dietPricePerDay * (int) $candidate['estimated_days_to_goal']; ?>
-                                <span><?= esc(number_format($totalPrice, 2)) ?> EUR</span>
+                                <?php if (!empty($isGold)): ?>
+                                    <?php $discountedTotal = $totalPrice * (1 - (float) ($goldDiscountRate ?? 0)); ?>
+                                    <span>
+                                        <?= esc(number_format($totalPrice, 2)) ?> Ar
+                                        (Gold: <?= esc(number_format($discountedTotal, 2)) ?> Ar)
+                                    </span>
+                                <?php else: ?>
+                                    <span><?= esc(number_format($totalPrice, 2)) ?> Ar</span>
+                                <?php endif; ?>
                             <?php else: ?>
-                                <span><?= esc(number_format($dietPricePerDay, 2)) ?> EUR / jour</span>
+                                <?php if (!empty($isGold)): ?>
+                                    <?php $discountedDaily = $dietPricePerDay * (1 - (float) ($goldDiscountRate ?? 0)); ?>
+                                    <span>
+                                        <?= esc(number_format($dietPricePerDay, 2)) ?> Ar / jour
+                                        (Gold: <?= esc(number_format($discountedDaily, 2)) ?> Ar)
+                                    </span>
+                                <?php else: ?>
+                                    <span><?= esc(number_format($dietPricePerDay, 2)) ?> Ar / jour</span>
+                                <?php endif; ?>
                             <?php endif; ?>
                         <?php else: ?>
                             <span>Non disponible</span>
@@ -135,9 +151,27 @@
                         <?php endif; ?>
                     </div>
 
+                    <?php
+                        $totalPrice = null;
+                        $discountedTotal = null;
+                        if (isset($dietPricePerDay) && $dietPricePerDay !== null && $candidate['estimated_days_to_goal'] !== null) {
+                            $totalPrice = $dietPricePerDay * (int) $candidate['estimated_days_to_goal'];
+                            if (!empty($isGold)) {
+                                $discountedTotal = $totalPrice * (1 - (float) ($goldDiscountRate ?? 0));
+                            }
+                        }
+                        $chargeAmount = $discountedTotal ?? $totalPrice;
+                        $canPay = true;
+                        if ($chargeAmount !== null && isset($walletBalance)) {
+                            $canPay = (float) $walletBalance >= (float) $chargeAmount;
+                        }
+                    ?>
                     <form method="post" action="<?= base_url('recommendations/choose/' . (int) $candidate['id']) ?>" style="margin-top: 16px;">
                         <?= csrf_field() ?>
-                        <button type="submit" class="btn-step">Choisir ce plan</button>
+                        <button type="submit" class="btn-step" <?= $canPay ? '' : 'disabled' ?>>Choisir ce plan</button>
+                        <?php if (!$canPay): ?>
+                            <p style="margin-top: 8px; color: #dc2626;">Solde insuffisant pour payer ce plan.</p>
+                        <?php endif; ?>
                     </form>
                 </div>
             <?php endforeach; ?>

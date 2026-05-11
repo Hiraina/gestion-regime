@@ -11,6 +11,7 @@ use App\Models\DietsModel;
 use App\Models\DietCompositionsModel;
 use App\Models\RecommendationActivitiesModel;
 use App\Models\RecommendationsModel;
+use App\Services\WalletService;
 use App\Models\UsersModel;
 
 class RecommendationController extends BaseController
@@ -301,10 +302,20 @@ class RecommendationController extends BaseController
             }
         }
 
+        $walletService = new WalletService();
+        $walletBalance = $walletService->getBalance($userId);
+        
+            $goldService = new \App\Services\GoldService();
+            $isGold = $goldService->isGold($userId);
+            $goldDiscountRate = $goldService->getDiscountRate();
+
         return view('recommendations/candidates', [
             'candidates' => $candidates,
             'dietPreview' => $dietPreview,
             'dietPricePerDay' => $dietPricePerDay,
+            'walletBalance' => $walletBalance,
+                'isGold' => $isGold,
+                'goldDiscountRate' => $goldDiscountRate,
             'error' => session()->getFlashdata('error'),
         ]);
     }

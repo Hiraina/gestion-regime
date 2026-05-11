@@ -25,12 +25,12 @@
 
     <div class="profile-item">
         <span class="profile-label">Prix de l'upgrade</span>
-        <span class="profile-value"><?= esc(number_format($upgradePrice, 2)) ?> EUR</span>
+        <span class="profile-value"><?= esc(number_format($upgradePrice, 2)) ?> Ar</span>
     </div>
 
     <div class="profile-item">
         <span class="profile-label">Solde portefeuille</span>
-        <span class="profile-value" id="gold-balance"><?= esc(number_format($balance ?? 0, 2)) ?> EUR</span>
+        <span class="profile-value" id="gold-balance"><?= esc(number_format($balance ?? 0, 2)) ?> Ar</span>
     </div>
 
     <?php $canUpgrade = !$isGold && (float) ($balance ?? 0) >= (float) $upgradePrice; ?>
@@ -92,7 +92,7 @@ if (goldBtn) {
             goldMessage.style.color = '#16a34a';
             goldMessage.textContent = 'Upgrade reussi. Bienvenue Gold !';
             if (data.result && balanceEl) {
-                balanceEl.textContent = Number(data.result.new_balance).toFixed(2) + ' EUR';
+                balanceEl.textContent = Number(data.result.new_balance).toFixed(2) + ' Ar';
             }
             goldBtn.disabled = true;
             goldBtn.textContent = 'Gold deja actif';
@@ -126,7 +126,7 @@ codeForm.addEventListener('submit', async (event) => {
         codeMessage.style.color = '#16a34a';
         codeMessage.textContent = data.message || 'Code valide.';
         if (balanceEl && data.new_balance) {
-            balanceEl.textContent = data.new_balance + ' EUR';
+            balanceEl.textContent = data.new_balance + ' Ar';
         }
     } else {
         codeMessage.style.color = '#dc2626';
